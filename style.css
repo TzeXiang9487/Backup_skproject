@@ -1,0 +1,152 @@
+/* =========================================
+   TEMA: ARTORIA PENDRAGON (SABER)
+   Warna: Royal Blue, Excalibur Gold, Silver Armor
+   ========================================= */
+:root {
+    --saber-blue: #1e3a8a;
+    --saber-gold: #facc15;
+    --saber-gold-hover: #fef08a;
+    --saber-armor-dark: #64748b;
+    --saber-armor-light: #cbd5e1;
+    --saber-dark: #0f172a;
+    --saber-bg: #080f1e;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--saber-bg);
+    color: #f8fafc;
+    margin: 0;
+    padding: 20px;
+}
+
+/* --- HEADER & NAV BAR --- */
+.header {
+    background: linear-gradient(135deg, #172554 0%, var(--saber-blue) 100%);
+    color: var(--saber-gold);
+    padding: 20px;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border: 2px solid var(--saber-armor-dark);
+    border-bottom: 4px solid var(--saber-gold);
+    margin-bottom: 0;
+}
+
+.nav-bar {
+    background-color: var(--saber-dark);
+    display: flex;
+    justify-content: center;
+    border-left: 2px solid var(--saber-armor-dark);
+    border-right: 2px solid var(--saber-armor-dark);
+    border-bottom: 2px solid var(--saber-armor-dark);
+    margin-bottom: 20px;
+}
+
+.nav-item {
+    color: var(--saber-armor-light);
+    text-decoration: none;
+    padding: 15px 25px;
+    font-weight: 600;
+    border-right: 1px solid var(--saber-armor-dark);
+}
+
+.nav-item:last-child {
+    border-right: none;
+}
+
+.nav-item:hover {
+    color: white;
+    background-color: rgba(30, 58, 138, 0.5);
+}
+
+.nav-item.active {
+    color: var(--saber-gold);
+    background-color: rgba(250, 204, 21, 0.1);
+    border-bottom: 3px solid var(--saber-gold);
+}
+
+/* --- JADUAL (KEMBALI KEPADA REKA BENTUK ASAL BERSERTA BORDER) --- */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Cantumkan border supaya kemas */
+    background-color: var(--saber-dark);
+    margin: 20px 0;
+}
+
+table, th, td {
+    border: 1px solid var(--saber-armor-light); /* BORDER PERAK DIKEMBALIKAN */
+}
+
+th {
+    background-color: var(--saber-blue);
+    color: var(--saber-gold);
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+    color: white;
+}
+
+/* Gaya Butang (Edit/Batal/Cetak) di dalam Jadual */
+td a, td button {
+    color: var(--saber-gold);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 5px 10px;
+}
+td a:hover, td button:hover {
+    color: var(--saber-gold-hover);
+    text-decoration: underline;
+}
+
+/* --- INPUT BORANG (UNTUK LOGIN ASAL ANDA) --- */
+input[type="text"], 
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid var(--saber-armor-dark);
+    background-color: #1e293b;
+    color: white;
+    border-radius: 4px;
+}
+
+input[type="text"]:focus, 
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--saber-gold);
+}
+
+/* --- BUTANG UTAMA --- */
+.btn, input[type="submit"], button {
+    background-color: var(--saber-gold);
+    color: var(--saber-dark);
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn:hover, input[type="submit"]:hover, button:hover {
+    background-color: var(--saber-gold-hover);
+}
+
+/* --- FOOTER --- */
+.footer {
+    text-align: center;
+    padding: 15px;
+    color: var(--saber-armor-light);
+    border: 2px solid var(--saber-armor-dark);
+    background-color: var(--saber-dark);
+    margin-top: 20px;
+}
