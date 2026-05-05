@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['voter_noKP'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -6,20 +13,63 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<script>
+    // 1. Check and apply theme immediately to prevent white flashes
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+        }
+    });
+
+    // 3. The Toggle Function
+    function toggleTheme() {
+        var body = document.body;
+        var themeBtn = document.getElementById('theme-btn');
+        
+        // Remove and re-add the 'spin' class to trigger the CSS animation
+        themeBtn.classList.remove('spin');
+        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        themeBtn.classList.add('spin');
+
+        // Switch the theme
+        body.classList.toggle('light-mode');
+        
+        // Halfway through the animation (200ms), swap the icon so it looks seamless
+        setTimeout(() => {
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+                themeBtn.innerText = '☀️'; // Change to Sun
+            } else {
+                localStorage.setItem('theme', 'dark');
+                themeBtn.innerText = '🌙'; // Change to Moon
+            }
+        }, 200); 
+    }
+</script>
     <div class="page-wrapper">
         <div class="container">
-            <div class="header">Sistem D'Undi Pertandingan Penciptaan Permainan Video</div>
+            <div class="header">
+    <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
+    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+</div>
             
             <div class="nav-bar">
                 <a href="utama.php" class="nav-item active">Laman Utama</a>
                 <a href="undian.php" class="nav-item">Undian</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
-                <a href="pengundi.php" class="nav-item">Pengundi</a>
-                <a href="logout.php" class="nav-item">Keluar</a>
+                <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar</a>
             </div>
 
             <div class="content" style="text-align: center;">
-                <h2 id="user-greeting" style="color: #3b82f6; margin-bottom: 20px;">Selamat Datang!</h2>
+                <h2 style="color: #3b82f6; margin-bottom: 20px;">
+                    Selamat Datang, <?php echo htmlspecialchars($_SESSION['voter_name']); ?>!
+                </h2>
 
                 <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
                     Sertai undian untuk menentukan ciptaan permainan video terbaik! 
@@ -37,16 +87,15 @@
     </div>
 
     <script>
-        // 1. Get the user's name from localStorage
-        const userName = localStorage.getItem('voter_name');
+        // Keep localStorage in sync with session
+        localStorage.setItem('voter_name', '<?php echo addslashes($_SESSION['voter_name']); ?>');
+        localStorage.setItem('voter_noKP', '<?php echo addslashes($_SESSION['voter_noKP']); ?>');
 
-        // 2. Check if the name exists
-        if (userName) {
-            // Update the header with the actual name
-            document.getElementById('user-greeting').innerText = "Selamat Datang, " + userName + "!";
-        } else {
-            // 3. If no name found (not logged in), redirect to login page
-            window.location.href = 'login.php';
+        // ✅ LOGOUT FUNCTION
+        function keluarAkaun() {
+            localStorage.removeItem('voter_noKP');
+            localStorage.removeItem('voter_name');
+            window.location.href = 'login.php?logout=1';
         }
     </script>
 </body>

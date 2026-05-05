@@ -11,86 +11,131 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($nama) && !empty($idKelas) && !empty($noKP) && !empty($katalaluan)) {
         
+        // Start Transaction
         $conn->begin_transaction();
 
         try {
+            // 1. Insert into PENGUNDI
             $stmt1 = $conn->prepare("INSERT INTO PENGUNDI (noKP, nama, idKelas) VALUES (?, ?, ?)");
             $stmt1->bind_param("sss", $noKP, $nama, $idKelas);
             $stmt1->execute();
 
+            // 2. Insert into PENGGUNA
             $stmt2 = $conn->prepare("INSERT INTO pengguna (noKP, katalaluan) VALUES (?, ?)");
             $stmt2->bind_param("ss", $noKP, $katalaluan);
             $stmt2->execute();
 
+            // Commit if both succeeded
             $conn->commit();
-            $message = "<p style='color: #22c55e; text-align: center; font-weight: bold;'>Pendaftaran Berjaya! Anda akan dibawa ke halaman Log Masuk.</p>";
+            $message = "<div class='message success'>Pendaftaran Berjaya! Sila log masuk.</div>";
             header("refresh:2;url=login.php");
 
         } catch (Exception $e) {
+            // Rollback if something goes wrong (e.g., duplicate noKP)
             $conn->rollback();
-            $message = "<p style='color: #ef4444; text-align: center; font-weight: bold;'>Ralat: Pendaftaran gagal atau No KP sudah wujud.</p>";
+            $message = "<div class='message error'>Ralat: No. KP sudah wujud atau masalah sistem.</div>";
         }
     }
 }
 
-// Fetch classes for the dropdown
-$sql_kelas = "SELECT * FROM KELAS";
+$sql_kelas = "SELECT idKelas, kelas FROM KELAS";
 $result_kelas = $conn->query($sql_kelas);
 ?>
 
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daftar Pengguna - Game Dev Vote</title>
-    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
+    <title>Register - Game Dev Vote</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-    
-    <div style="max-width: 600px; width: 100%;">
-        <div class="header" style="margin-bottom: 0;">Pendaftaran Pengguna Baru</div>
-        <div style="background-color: var(--saber-dark); border: 2px solid var(--saber-armor-dark); border-top: none; padding: 30px;">
-            
-            <?php echo $message; ?>
+<body class="centered-page">
+<script>
+    // 1. Check and apply theme immediately to prevent white flashes
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
 
-            <form action="register.php" method="POST">
-                <table style="width: 100%; border: none; background: transparent; margin: 0;">
-                    <tr style="border: none;">
-                        <td style="border: none; text-align: right; width: 35%; padding: 10px;"><label style="color: white; font-weight: bold;">Nama :</label></td>
-                        <td style="border: none; text-align: left; padding: 10px;"><input type="text" name="nama" required></td>
-                    </tr>
-                    <tr style="border: none;">
-                        <td style="border: none; text-align: right; padding: 10px;"><label style="color: white; font-weight: bold;">Kelas :</label></td>
-                        <td style="border: none; text-align: left; padding: 10px;">
-                            <select name="idKelas" required style="width: 100%; padding: 10px; border: 1px solid var(--saber-armor-dark); background-color: #1e293b; color: white; border-radius: 4px;">
-                                <option value="">-- Sila Pilih Kelas --</option>
-                                <?php 
-                                while($row = $result_kelas->fetch_assoc()) {
-                                    echo "<option value='".$row['idKelas']."'>".$row['kelas']."</option>";
-                                }
-                                ?>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr style="border: none;">
-                        <td style="border: none; text-align: right; padding: 10px;"><label style="color: white; font-weight: bold;">No Kad Pengenalan :</label></td>
-                        <td style="border: none; text-align: left; padding: 10px;"><input type="text" name="noKP" placeholder="Cth: 090214071234" required></td>
-                    </tr>
-                    <tr style="border: none;">
-                        <td style="border: none; text-align: right; padding: 10px;"><label style="color: white; font-weight: bold;">Katalaluan :</label></td>
-                        <td style="border: none; text-align: left; padding: 10px;"><input type="password" name="katalaluan" required></td>
-                    </tr>
-                    <tr style="border: none;">
-                        <td colspan="2" style="border: none; text-align: center; padding-top: 20px;">
-                            <button type="submit" class="btn">Daftar</button>
-                            &nbsp;&nbsp;
-                            <button type="button" class="btn" style="background-color: var(--saber-armor-dark); color: white;" onclick="window.location.href='login.php'">Batal</button>
-                        </td>
-                    </tr>
-                </table>
-            </form>
+    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+        }
+    });
+
+    // 3. The Toggle Function
+    function toggleTheme() {
+        var body = document.body;
+        var themeBtn = document.getElementById('theme-btn');
+        
+        // Remove and re-add the 'spin' class to trigger the CSS animation
+        themeBtn.classList.remove('spin');
+        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        themeBtn.classList.add('spin');
+
+        // Switch the theme
+        body.classList.toggle('light-mode');
+        
+        // Halfway through the animation (200ms), swap the icon so it looks seamless
+        setTimeout(() => {
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+                themeBtn.innerText = '☀️'; // Change to Sun
+            } else {
+                localStorage.setItem('theme', 'dark');
+                themeBtn.innerText = '🌙'; // Change to Moon
+            }
+        }, 200); 
+    }
+</script>
+
+    <div class="page-wrapper">
+        <div class="container">
+            <div class="header">
+                <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
+                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+            </div>
+            <div class="content">
+                <h3>Pendaftaran Undi</h3>
+                <?php echo $message; ?>
+
+                <form action="register.php" method="POST">
+                    <div class="form-group">
+                        <label>Nama :</label>
+                        <input type="text" name="nama" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Kelas :</label>
+                        <select name="idKelas" required>
+                            <option value="">-- Sila Pilih Kelas --</option>
+                            <?php 
+                            while($row = $result_kelas->fetch_assoc()) {
+                                echo "<option value='".$row['idKelas']."'>".$row['kelas']."</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kad Pengenalan (Username) :</label>
+                        <input type="text" name="noKP" placeholder="090214-07-1234" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Katalaluan :</label>
+                        <input type="password" name="katalaluan" required>
+                    </div>
+
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='login.php'">Batal</button>
+                        <button type="submit" class="btn btn-primary">Daftar</button>
+                    </div>
+                </form>
+            </div>
+            <div class="footer">Hak Cipta Goh Tze Xiang @ SPM 2025</div>
         </div>
     </div>
-
 </body>
 </html>

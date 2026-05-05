@@ -1,28 +1,39 @@
 <?php
 require_once 'config.php';
 
-// 1. Proses undian ke pangkalan data
+// 1. Process voting into the database (Strict: One vote per lifetime)
 if (isset($_GET['vote_id']) && isset($_GET['voter_ic'])) {
     $idCalon = $_GET['vote_id'];
     $noKP = $_GET['voter_ic']; 
     $tarikh = date("Y-m-d");
 
-    $sql_vote = "INSERT INTO PENGUNDIAN (noKP, tarikh, idCalon) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql_vote);
-    $stmt->bind_param("sss", $noKP, $tarikh, $idCalon);
+    $sql_check = "SELECT * FROM PENGUNDIAN WHERE noKP = ?";
+    $stmt_check = $conn->prepare($sql_check);
+    $stmt_check->bind_param("s", $noKP);
+    $stmt_check->execute();
+    $result_check = $stmt_check->get_result();
 
-    if ($stmt->execute()) {
-        echo "<script>alert('Undian Berjaya!'); window.location.href='keputusan.php';</script>";
+    if ($result_check->num_rows > 0) {
+        echo "<script>alert('Error: You have already voted! Each user can only vote once.'); window.location.href='undian.php';</script>";
     } else {
-        echo "<script>alert('Ralat: Anda sudah pun mengundi hari ini!'); window.location.href='undian.php';</script>";
+        $sql_vote = "INSERT INTO PENGUNDIAN (noKP, tarikh, idCalon) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql_vote);
+        $stmt->bind_param("sss", $noKP, $tarikh, $idCalon);
+
+        if ($stmt->execute()) {
+            echo "<script>alert('Undian Berjaya!'); window.location.href='keputusan.php';</script>";
+        } else {
+            echo "<script>alert('Ralat semasa merekod undian.'); window.location.href='undian.php';</script>";
+        }
+        $stmt->close();
     }
-    $stmt->close();
+    $stmt_check->close();
     exit();
 }
 
-// 2. Dapatkan senarai calon 
-// (Nota: Kita tak perlu COUNT undi lagi di sini sebab kita dah buang dari paparan)
-$sql_calon = "SELECT * FROM CALON";
+$sql_calon = "SELECT c.*, 
+             (SELECT COUNT(*) FROM PENGUNDIAN p WHERE p.idCalon = c.idCalon) as jumlah_undi 
+             FROM CALON c";
 $result_calon = $conn->query($sql_calon);
 ?>
 
@@ -33,12 +44,67 @@ $result_calon = $conn->query($sql_calon);
     <title>Undian - Game Dev Vote</title>
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
     <style>
-        /* CSS UNTUK ANIMASI KAD MENGEMBANG KE KANAN (SAIZ DIKECILKAN) */
+        /* ── Desktop only: no scroll ── */
+        @media (min-width: 768px) {
+            html, body {
+                overflow: hidden;
+                height: 100%;
+            }
+
+            .page-wrapper {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .container {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .content {
+                flex: 1;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+            }
+
+            .voting-container {
+                overflow: hidden;
+                gap: 15px;
+                padding: 10px;
+            }
+
+            /* Scale down cards to fit within screen */
+            .candidate-card {
+                height: 230px;
+            }
+
+            .candidate-card:hover {
+                width: 460px;
+            }
+
+            .card-left {
+                width: 200px;
+            }
+
+            .card-right {
+                width: 280px;
+            }
+        }
+
+        /* ── Base card styles (all screens) ── */
         .voting-container {
             display: flex;
-            flex-wrap: nowrap; /* Paksa supaya sentiasa 1 baris */
+            flex-wrap: wrap; 
             justify-content: center;
-            gap: 20px; /* Jarak antara kad dikecilkan sikit */
+            gap: 25px; 
             padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
@@ -47,8 +113,7 @@ $result_calon = $conn->query($sql_calon);
         .candidate-card {
             display: flex;
             flex-direction: row;
-            /* Saiz baru: Lebih kecil supaya muat 3 dalam 1 baris bila mengembang */
-            width: 260px; 
+            width: 260px;
             height: 360px; 
             background: #1e293b;
             border-radius: 16px;
@@ -58,15 +123,14 @@ $result_calon = $conn->query($sql_calon);
         }
 
         .candidate-card:hover {
-            /* Mengembang: 260px (Gambar) + 280px (Teks) = 540px */
-            width: 540px; 
+            width: 540px;
             border-color: #3b82f6;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            z-index: 10;
         }
 
-        /* BAHAGIAN KIRI: GAMBAR */
         .card-left {
-            width: 260px; /* Lebar asal gambar */
+            width: 260px; 
             height: 100%;
             flex-shrink: 0; 
             position: relative;
@@ -79,12 +143,11 @@ $result_calon = $conn->query($sql_calon);
             border-right: 1px solid #334155;
         }
 
-        /* BAHAGIAN KANAN: MAKLUMAT & BUTANG */
         .card-right {
-            width: 280px; /* Lebar panel maklumat yang baru */
+            width: 280px; 
             height: 100%;
             flex-shrink: 0; 
-            padding: 25px; /* Kurangkan padding sikit */
+            padding: 25px; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -100,20 +163,27 @@ $result_calon = $conn->query($sql_calon);
             transition-delay: 0.15s; 
         }
 
-        /* TIPOGRAFI & GAYA DALAMAN KAD */
         .game-title {
             color: white;
             font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 15px; /* Jarak terus ke keterangan */
+            margin-bottom: 5px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .candidate-count {
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: block;
         }
 
         .game-desc {
             color: #94a3b8;
             font-size: 0.95rem;
             line-height: 1.5;
-            margin-bottom: auto; /* Tolak butang ke bawah */
+            margin-bottom: auto;
         }
 
         .btn-vote {
@@ -123,6 +193,12 @@ $result_calon = $conn->query($sql_calon);
             text-transform: uppercase;
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            cursor: pointer;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
         .btn-vote:hover {
@@ -132,33 +208,71 @@ $result_calon = $conn->query($sql_calon);
     </style>
 </head>
 <body>
+<script>
+    // 1. Check and apply theme immediately to prevent white flashes
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+        }
+    });
+
+    // 3. The Toggle Function
+    function toggleTheme() {
+        var body = document.body;
+        var themeBtn = document.getElementById('theme-btn');
+        
+        // Remove and re-add the 'spin' class to trigger the CSS animation
+        themeBtn.classList.remove('spin');
+        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        themeBtn.classList.add('spin');
+
+        // Switch the theme
+        body.classList.toggle('light-mode');
+        
+        // Halfway through the animation (200ms), swap the icon so it looks seamless
+        setTimeout(() => {
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+                themeBtn.innerText = '☀️'; // Change to Sun
+            } else {
+                localStorage.setItem('theme', 'dark');
+                themeBtn.innerText = '🌙'; // Change to Moon
+            }
+        }, 200); 
+    }
+</script>
     <div class="page-wrapper">
         <div class="container">
             
-            <div class="header">Sistem D'Undi Pertandingan Penciptaan Permainan Video</div>
+            <div class="header">
+                <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
+                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+            </div>
+            
             <div class="nav-bar">
                 <a href="utama.php" class="nav-item">Laman Utama</a>
                 <a href="undian.php" class="nav-item active">Undian</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
-                <a href="logout.php" class="nav-item">Keluar</a>
+                <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar</a>
             </div>
+            
             <div class="content">
-                <h2 style="color: var(--saber-gold); text-align: center; margin-bottom: 20px;">Senarai Calon Pertandingan Permainan Video</h2>
-                
-                <div class="grid-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-                    
-            <div class="content">
-                <p style="text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 1.1rem;">
+                <h2 style="color: #fbbf24; text-align: center; margin-bottom: 5px;">Senarai Calon Pertandingan Permainan Video</h2>
+                <p style="text-align: center; color: #94a3b8; margin-bottom: 10px; font-size: 1rem;">
                     Sila hover (halakan kursor) pada gambar untuk melihat maklumat, kemudian undi permainan video pilihan anda!
                 </p>
 
                 <div class="voting-container">
                     <?php
-                    // MULA GELUNG WHILE UNTUK PAPAR KAD
                     if ($result_calon->num_rows > 0) {
                         while($row = $result_calon->fetch_assoc()) {
                             
-                            // --- LOKASI GAMBAR & KETERANGAN ---
                             $lokasi_gambar = "image/placeholder.jpg"; 
                             $keterangan = "Sebuah ciptaan permainan video yang hebat.";
 
@@ -172,33 +286,27 @@ $result_calon = $conn->query($sql_calon);
                                 $lokasi_gambar = "image/C03.png";
                                 $keterangan = "Permainan aksi tembak-menembak (run and gun) klasik yang memfokuskan kepada pertarungan bos epik, dengan gaya seni kartun era 1930-an lukisan tangan yang sangat retro.";
                             }
-                            // ----------------------------------
                             ?>
                             
                             <div class="candidate-card">
-                                
                                 <div class="card-left">
                                     <img src="<?php echo $lokasi_gambar; ?>" onerror="this.src='image/placeholder.jpg';" alt="<?php echo htmlspecialchars($row['namaCalon']); ?>">
                                 </div>
                                 
                                 <div class="card-right">
                                     <h3 class="game-title"><?php echo htmlspecialchars($row['namaCalon']); ?></h3>
-                                    
-                                    <p class="game-desc">
-                                        <?php echo $keterangan; ?>
-                                    </p>
-                                    
-                                    <button type="button" onclick="prosesUndian('<?php echo $row['idCalon']; ?>')" class="btn btn-primary btn-vote">
+                                    <span class="candidate-count"><?php echo $row['jumlah_undi']; ?> Undi Terkumpul</span>
+                                    <p class="game-desc"><?php echo $keterangan; ?></p>
+                                    <button type="button" onclick="prosesUndian('<?php echo $row['idCalon']; ?>')" class="btn-vote">
                                         Undi Sekarang
                                     </button>
                                 </div>
-                                
                             </div>
                             
                             <?php
                         }
                     } else {
-                        echo "<p style='text-align:center; width: 100%; color: white;'>Tiada calon dijumpai dalam pangkalan data.</p>";
+                        echo "<p class='empty-message'>Tiada calon dijumpai dalam pangkalan data.</p>";
                     }
                     ?>
                 </div>
@@ -208,19 +316,25 @@ $result_calon = $conn->query($sql_calon);
     </div>
 
     <script>
-    function prosesUndian(idCalon) {
-        const noKP = localStorage.getItem('voter_noKP');
-        
-        if (!noKP) {
-            alert("Sila log masuk terlebih dahulu sebelum mengundi!");
-            window.location.href = 'login.php';
-            return;
+        function prosesUndian(idCalon) {
+            const noKP = localStorage.getItem('voter_noKP');
+            
+            if (!noKP) {
+                alert("Sila log masuk terlebih dahulu sebelum mengundi!");
+                window.location.href = 'login.php';
+                return;
+            }
+            
+            if (confirm("Adakah anda pasti mahu mengundi ciptaan permainan video ini? Anda hanya boleh mengundi sekali sahaja.")) {
+                window.location.href = 'undian.php?vote_id=' + idCalon + '&voter_ic=' + noKP;
+            }
         }
-        
-        if (confirm("Adakah anda pasti mahu mengundi ciptaan permainan video ini?")) {
-            window.location.href = 'undian.php?vote_id=' + idCalon + '&voter_ic=' + noKP;
+
+        function keluarAkaun() {
+            localStorage.removeItem('voter_noKP');
+            localStorage.removeItem('voter_name');
+            window.location.href = 'login.php?logout=1';
         }
-    }
     </script>
 </body>
 </html>
