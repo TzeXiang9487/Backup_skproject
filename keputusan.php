@@ -25,47 +25,125 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <title>Keputusan Undian - Game Dev Vote</title>
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
+    <style>
+        /* =========================================
+           FULL SCREEN & NO SCROLL LAYOUT
+           ========================================= */
+        html, body {
+            overflow: hidden; /* Force hide the scrollbar */
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-wrapper {
+            height: 100vh; /* Exactly 100% of screen height */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content {
+            flex: 1; /* Automatically stretches to fill remaining space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center;
+            overflow: hidden;
+            padding: 10px 20px !important;
+        }
+
+        /* Container holding the cards */
+        .ranking-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: nowrap; /* FORCES cards to stay on one line */
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Make cards responsive so they squeeze instead of pushing down */
+        .ranking-card {
+            flex: 1 1 0; /* Let cards grow and shrink evenly */
+            max-width: 250px; /* Don't get bigger than this */
+            min-width: 150px; /* Don't get smaller than this */
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Responsive square images */
+        .ranking-image-container {
+            width: 100%;
+            aspect-ratio: 1 / 1; /* Always perfectly square based on width */
+            height: auto;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .ranking-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ranking-label {
+            width: 100%;
+            padding: 8px 0;
+        }
+    </style>
 </head>
 <body>
-<script>
-    // 1. Check and apply theme immediately to prevent white flashes
-    if (localStorage.getItem('theme') === 'light') {
-        document.body.classList.add('light-mode');
-    }
-
-    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
-    window.addEventListener('DOMContentLoaded', () => {
-        const themeBtn = document.getElementById('theme-btn');
-        if (themeBtn) {
-            themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+    <script>
+        // 1. Check and apply theme immediately to prevent white flashes
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
         }
-    });
 
-    // 3. The Toggle Function
-    function toggleTheme() {
-        var body = document.body;
-        var themeBtn = document.getElementById('theme-btn');
-        
-        // Remove and re-add the 'spin' class to trigger the CSS animation
-        themeBtn.classList.remove('spin');
-        void themeBtn.offsetWidth; // This forces the browser to restart the animation
-        themeBtn.classList.add('spin');
-
-        // Switch the theme
-        body.classList.toggle('light-mode');
-        
-        // Halfway through the animation (200ms), swap the icon so it looks seamless
-        setTimeout(() => {
-            if (body.classList.contains('light-mode')) {
-                localStorage.setItem('theme', 'light');
-                themeBtn.innerText = '☀️'; // Change to Sun
-            } else {
-                localStorage.setItem('theme', 'dark');
-                themeBtn.innerText = '🌙'; // Change to Moon
+        // 2. Set the correct icon (Sun or Moon) as soon as the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            const themeBtn = document.getElementById('theme-btn');
+            if (themeBtn) {
+                themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
             }
-        }, 200); 
-    }
-</script>
+        });
+
+        // 3. The Toggle Function
+        function toggleTheme() {
+            var body = document.body;
+            var themeBtn = document.getElementById('theme-btn');
+            
+            // Remove and re-add the 'spin' class to trigger the CSS animation
+            themeBtn.classList.remove('spin');
+            void themeBtn.offsetWidth; // This forces the browser to restart the animation
+            themeBtn.classList.add('spin');
+
+            // Switch the theme
+            body.classList.toggle('light-mode');
+            
+            // Halfway through the animation (200ms), swap the icon so it looks seamless
+            setTimeout(() => {
+                if (body.classList.contains('light-mode')) {
+                    localStorage.setItem('theme', 'light');
+                    themeBtn.innerText = '☀️'; // Change to Sun
+                } else {
+                    localStorage.setItem('theme', 'dark');
+                    themeBtn.innerText = '🌙'; // Change to Moon
+                }
+            }, 200); 
+        }
+    </script>
     <div class="page-wrapper">
         <div class="container">
             
@@ -99,7 +177,7 @@ $result = $conn->query($sql);
                     Berikut ialah keputusan Undi !
                 </h2>
 
-                <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px;">
+                <div class="ranking-container">
                     
                     <?php
                     if ($result->num_rows > 0) {
@@ -128,9 +206,9 @@ $result = $conn->query($sql);
 
                             echo "<div class='ranking-card'>";
 
-                            // Image box (simplified style to blend perfectly with CSS)
-                            echo "  <div style='width: 220px; height: 220px; margin-bottom: 15px; border-radius: 8px; overflow: hidden;'>";
-                            echo "      <img src='{$lokasi_gambar}' style='width: 100%; height: 100%; object-fit: cover;' alt='" . htmlspecialchars($row['namaCalon']) . "'>";
+                            // New Responsive Image Box
+                            echo "  <div class='ranking-image-container'>";
+                            echo "      <img src='{$lokasi_gambar}' alt='" . htmlspecialchars($row['namaCalon']) . "'>";
                             echo "  </div>";
 
                             // Ranking label
