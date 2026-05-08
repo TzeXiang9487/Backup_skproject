@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Commit if both succeeded
             $conn->commit();
             $message = "<div class='message success'>Pendaftaran Berjaya! Sila log masuk.</div>";
-            header("refresh:2;url=login.php");
+            header("refresh:2;url=index.php");
 
         } catch (Exception $e) {
             // Rollback if something goes wrong (e.g., duplicate noKP)
@@ -129,7 +129,7 @@ $result_kelas = $conn->query($sql_kelas);
                     </div>
 
                     <div class="btn-container">
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='login.php'">Batal</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">Batal</button>
                         <button type="submit" class="btn btn-primary">Daftar</button>
                     </div>
                 </form>

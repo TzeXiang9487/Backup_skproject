@@ -3,7 +3,7 @@ session_start();
 require_once 'config.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -143,7 +143,7 @@ $result = $conn->query($sql);
                 <a href="admin.php" class="nav-item active">Dashboard Admin</a>
                 <a href="import.php" class="nav-item">Import</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
-                <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar (Admin)</a>
+                <a href="logout.php" class="nav-item">Keluar</a>
             </div>
 
             <div class="content">
@@ -229,7 +229,7 @@ $result = $conn->query($sql);
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['confirm_batal'])) {
         $noKP = $_POST['noKP'];
         $tarikh = $_POST['tarikh'];
-        $stmt = $conn->prepare("DELETE FROM pengundian WHERE noKP = ? AND tarikh = ?");
+        $stmt = $conn->prepare("DELETE FROM pengundian WHERE noKP = ?");
         $stmt->bind_param("ss", $noKP, $tarikh);
         if ($stmt->execute()) {
             echo "<script>alert('Rekod undian berjaya dipadam!'); window.location.href='admin.php';</script>";
@@ -248,11 +248,9 @@ $result = $conn->query($sql);
             document.getElementById('batalModal').style.display = 'flex';
         }
 
-        function keluarAkaun() {
-            localStorage.removeItem('voter_noKP');
-            localStorage.removeItem('voter_name');
-            window.location.href = 'login.php?logout=1';
-        }
+function keluarAdmin() {
+    window.location.href = 'logout.php';
+}
     </script>
 </body>
 </html>

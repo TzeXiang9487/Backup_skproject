@@ -6,7 +6,7 @@ $is_admin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] 
 $is_user = isset($_SESSION['voter_noKP']); 
 
 if (!$is_admin && !$is_user) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -156,7 +156,7 @@ $result = $conn->query($sql);
                     <a href="admin.php" class="nav-item">Dashboard Admin</a>
                     <a href="import.php" class="nav-item">Import</a>
                     <a href="keputusan.php" class="nav-item active">Keputusan</a>
-                    <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar (Admin)</a>
+                    <a href="logout.php" class="nav-item">Keluar</a>
                 </div>
             <?php else: ?>
                 <div class="header">
@@ -167,7 +167,7 @@ $result = $conn->query($sql);
                     <a href="utama.php" class="nav-item">Laman Utama</a>
                     <a href="undian.php" class="nav-item">Undian</a>
                     <a href="keputusan.php" class="nav-item active">Keputusan</a>
-                    <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar</a>
+                    <a href="logout.php" class="nav-item">Keluar</a>
                 </div>
             <?php endif; ?>
 
@@ -241,11 +241,13 @@ $result = $conn->query($sql);
     </div>
 
     <script>
-        function keluarAkaun() {
-            localStorage.removeItem('voter_noKP');
-            localStorage.removeItem('voter_name');
-            window.location.href = 'login.php?logout=1';
-        }
-    </script>
+function keluarAkaun() {
+    // Keep these so the frontend forgets the user too
+    localStorage.removeItem('voter_noKP');
+    localStorage.removeItem('voter_name');
+    
+    // CHANGE THIS LINE to point to your new file
+    window.location.href = 'logout.php'; 
+}
 </body>
 </html>

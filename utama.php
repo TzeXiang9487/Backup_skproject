@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['voter_noKP'])) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 ?>
@@ -63,7 +63,7 @@ if (!isset($_SESSION['voter_noKP'])) {
                 <a href="utama.php" class="nav-item active">Laman Utama</a>
                 <a href="undian.php" class="nav-item">Undian</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
-                <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar</a>
+                <a href="logout.php" class="nav-item">Keluar</a>
             </div>
 
             <div class="content" style="text-align: center;">
@@ -92,11 +92,14 @@ if (!isset($_SESSION['voter_noKP'])) {
         localStorage.setItem('voter_noKP', '<?php echo addslashes($_SESSION['voter_noKP']); ?>');
 
         // ✅ LOGOUT FUNCTION
-        function keluarAkaun() {
-            localStorage.removeItem('voter_noKP');
-            localStorage.removeItem('voter_name');
-            window.location.href = 'login.php?logout=1';
-        }
+function keluarAkaun() {
+    // Keep these so the frontend forgets the user too
+    localStorage.removeItem('voter_noKP');
+    localStorage.removeItem('voter_name');
+    
+    // CHANGE THIS LINE to point to your new file
+    window.location.href = 'logout.php'; 
+}
     </script>
 </body>
 </html>

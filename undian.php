@@ -1,7 +1,19 @@
 <?php
+session_start();
 require_once 'config.php';
 
-// 1. Process voting into the database (Strict: One vote per lifetime)
+// 2. SECURITY CHECK: Kick out if not logged in
+if (!isset($_SESSION['voter_noKP'])) {
+    header("Location: index.php");
+    exit();
+}
+
+// 3. Prevent browser from caching the page (Stops the "Back" button issue completely)
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+// 4. Process voting into the database (Strict: One vote per lifetime)
 if (isset($_GET['vote_id']) && isset($_GET['voter_ic'])) {
     $idCalon = $_GET['vote_id'];
     $noKP = $_GET['voter_ic']; 
@@ -259,7 +271,7 @@ $result_calon = $conn->query($sql_calon);
                 <a href="utama.php" class="nav-item">Laman Utama</a>
                 <a href="undian.php" class="nav-item active">Undian</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
-                <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar</a>
+                <a href="logout.php" class="nav-item">Keluar</a>
             </div>
             
             <div class="content">
@@ -321,7 +333,7 @@ $result_calon = $conn->query($sql_calon);
             
             if (!noKP) {
                 alert("Sila log masuk terlebih dahulu sebelum mengundi!");
-                window.location.href = 'login.php';
+                window.location.href = 'index.php';
                 return;
             }
             
@@ -330,11 +342,14 @@ $result_calon = $conn->query($sql_calon);
             }
         }
 
-        function keluarAkaun() {
-            localStorage.removeItem('voter_noKP');
-            localStorage.removeItem('voter_name');
-            window.location.href = 'login.php?logout=1';
-        }
+function keluarAkaun() {
+    // Keep these so the frontend forgets the user too
+    localStorage.removeItem('voter_noKP');
+    localStorage.removeItem('voter_name');
+    
+    // CHANGE THIS LINE to point to your new file
+    window.location.href = 'logout.php'; 
+}
     </script>
 </body>
 </html>

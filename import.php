@@ -3,7 +3,7 @@ session_start();
 require_once 'config.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -255,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                 <a href="admin.php" class="nav-item">Dashboard Admin</a>
                 <a href="import.php" class="nav-item active">Import</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
-                <a href="#" class="nav-item" onclick="keluarAkaun()">Keluar (Admin)</a>
+                <a href="logout.php" class="nav-item">Keluar</a>
             </div>
 
             <div class="content">
@@ -300,7 +300,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
         function keluarAkaun() {
             localStorage.removeItem('voter_noKP');
             localStorage.removeItem('voter_name');
-            window.location.href = 'login.php?logout=1';
+            window.location.href = 'index.php?logout=1';
         }
 
         const tableNames = {

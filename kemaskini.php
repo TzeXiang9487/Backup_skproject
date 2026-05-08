@@ -3,7 +3,7 @@ session_start();
 require_once 'config.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -146,7 +146,7 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
 </div>
 
             <div class="content">
-                <h3 style="text-align: center; margin-bottom: 25px; color: #f8fafc;">Kemas Kini Data Pengundi</h3>
+                <h3 class="page-title" style="text-align: center; margin-bottom: 25px;">Kemas Kini Data Pengundi</h3>
 
                 <?php echo $message; ?>
 
