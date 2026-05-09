@@ -22,7 +22,9 @@ $sql = "SELECT
         JOIN kelas k ON pg.idKelas = k.idKelas
         LEFT JOIN pengundian pn2 ON pg.noKP = pn2.noKP
         LEFT JOIN calon c ON pn2.idCalon = c.idCalon
-        ORDER BY pg.nama ASC";
+        ORDER BY 
+            CASE WHEN pn2.tarikh IS NULL THEN 1 ELSE 0 END ASC,
+            pn2.tarikh DESC";
 
 $result = $conn->query($sql);
 ?>
@@ -32,104 +34,6 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <title>Panel Admin - Undian Pembangunan Permainan</title>
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
-    <style>
-        table th, table td { white-space: nowrap; }
-
-        html, body {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        html::-webkit-scrollbar,
-        body::-webkit-scrollbar { display: none; }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #1e293b;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-        }
-        .modal-content h3 { color: #ef4444; margin-bottom: 15px; }
-        .modal-content p  { color: #cbd5e1; margin-bottom: 25px; line-height: 1.6; }
-        .modal-content strong { color: #3b82f6; font-size: 1.1rem; }
-
-        /* Badge for voted / not voted status */
-        .badge-voted {
-            display: inline-block;
-            background-color: #064e3b;
-            color: #6ee7b7;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .badge-not-voted {
-            display: inline-block;
-            background-color: #7f1d1d;
-            color: #fca5a5;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        /* Light mode badges */
-        body.light-mode .badge-voted {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        body.light-mode .badge-not-voted {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
-        /* Dim the not-yet-voted rows slightly */
-        tr.belum-undi td {
-            opacity: 0.6;
-        }
-
-        .print-title { display: none; }
-
-        @page { margin: 0; }
-
-        @media print {
-            .header, .nav-bar, .btn-cetak, .footer, .aksi-column, h2 { display: none !important; }
-
-            /* Hide not-voted rows on print */
-            tr.belum-undi { display: none !important; }
-
-            /* Hide status column on print (not needed when only voted rows show) */
-            .status-column { display: none !important; }
-
-            .print-title {
-                display: block;
-                text-align: center;
-                font-size: 1.3rem;
-                font-weight: bold;
-                color: black;
-                margin: 30px 0 20px 0;
-            }
-
-            body, .container { background: white !important; color: black !important; }
-            .content { padding: 0 20px !important; }
-            table { border: 1px solid black; width: 100% !important; }
-            th, td { border-bottom: 1px solid black; color: black !important; background: white !important; font-size: 0.85rem; }
-            th { color: black !important; }
-        }
-    </style>
 </head>
 <body>
 <script>

@@ -16,7 +16,7 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-// Redirect ke login dengan mesej
+// Redirect ke index.php dengan mesej
 echo "<script>alert('Anda telah berjaya log keluar.'); window.location.replace('index.php');</script>";
 exit();
 ?>

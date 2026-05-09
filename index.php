@@ -145,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
                 <form action="index.php" method="POST">
                     <div class="form-group">
                         <label>No. Kad Pengenalan :</label>
-                        <input type="text" name="noKP" required placeholder="Contoh: 000000000000">
+                        <input type="text" name="noKP" required placeholder="Contoh: 000000-00-0000">
                     </div>
                     <div class="form-group">
                         <label>Katalaluan :</label>

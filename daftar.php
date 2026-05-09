@@ -105,7 +105,8 @@ $result_kelas = $conn->query($sql_kelas);
                 <form action="daftar.php" method="POST">
                     <div class="form-group">
                         <label>Nama Penuh :</label>
-                        <input type="text" name="nama" required placeholder="Masukkan nama penuh anda">
+                        <input type="text" name="nama" id="nama" required placeholder="Masukkan nama penuh anda"
+                            oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')">
                     </div>
                     
                     <div class="form-group">
@@ -122,7 +123,9 @@ $result_kelas = $conn->query($sql_kelas);
 
                     <div class="form-group">
                         <label>No. Kad Pengenalan :</label>
-                        <input type="text" name="noKP" placeholder="Contoh: 000000000000" required>
+                        <input type="text" name="noKP" id="noKP" placeholder="Contoh: 000000-00-0000" required
+                            maxlength="14"
+                            oninput="formatNoKP(this)">
                     </div>
 
                     <div class="form-group">
@@ -132,9 +135,34 @@ $result_kelas = $conn->query($sql_kelas);
 
                     <div class="btn-container" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
                         <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">Batal</button>
-                        <button type="submit" class="btn btn-primary">Daftar Sekarang</button>
+                        <button type="submit" class="btn btn-primary" onclick="return sahkanBorang()">Daftar Sekarang</button>
                     </div>
                 </form>
+
+                <script>
+                    function formatNoKP(input) {
+                        let val = input.value.replace(/\D/g, '');
+                        if (val.length > 6)  val = val.slice(0,6) + '-' + val.slice(6);
+                        if (val.length > 9)  val = val.slice(0,9) + '-' + val.slice(9);
+                        if (val.length > 14) val = val.slice(0,14);
+                        input.value = val;
+                    }
+
+                    function sahkanBorang() {
+                        const nama = document.getElementById('nama').value.trim();
+                        const noKP = document.getElementById('noKP').value.trim();
+
+                        if (!/^[a-zA-Z ]+$/.test(nama)) {
+                            alert('Nama hanya boleh mengandungi huruf abjad dan ruang sahaja.');
+                            return false;
+                        }
+                        if (!/^\d{6}-\d{2}-\d{4}$/.test(noKP)) {
+                            alert('Format No. KP tidak sah. Sila gunakan format: 000000-00-0000');
+                            return false;
+                        }
+                        return true;
+                    }
+                </script>
             </div>
             <div class="footer">Hak Cipta Goh Tze Xiang @ SPM 2025</div>
         </div>

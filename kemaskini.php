@@ -13,44 +13,20 @@ $message = "";
 // 1. Mengendalikan Penghantaran Borang Kemas Kini
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['sah_edit'])) {
     $oldNoKP    = $_POST['oldNoKP'];
-    $newNoKP    = trim($_POST['noKP']);
     $nama       = trim($_POST['nama']);
     $idKelas    = $_POST['idKelas'];
     $katalaluan = trim($_POST['katalaluan']);
 
     $conn->begin_transaction();
     try {
-        if ($newNoKP !== $oldNoKP) {
-            // noKP berubah — kemas kini semua jadual berkaitan dengan teliti
-            // Matikan semakan 'foreign key' buat sementara waktu
-            $conn->query("SET FOREIGN_KEY_CHECKS=0");
+        // noKP tidak boleh ditukar — hanya kemas kini nama, kelas, dan katalaluan
+        $s1 = $conn->prepare("UPDATE pengundi SET nama=?, idKelas=? WHERE noKP=?");
+        $s1->bind_param("sss", $nama, $idKelas, $oldNoKP);
+        $s1->execute();
 
-            // Kemas kini jadual pengundi
-            $s1 = $conn->prepare("UPDATE pengundi SET noKP=?, nama=?, idKelas=? WHERE noKP=?");
-            $s1->bind_param("ssss", $newNoKP, $nama, $idKelas, $oldNoKP);
-            $s1->execute();
-
-            // Kemas kini jadual pengguna
-            $s2 = $conn->prepare("UPDATE pengguna SET noKP=?, katalaluan=? WHERE noKP=?");
-            $s2->bind_param("sss", $newNoKP, $katalaluan, $oldNoKP);
-            $s2->execute();
-
-            // Kemas kini jadual pengundian jika wujud
-            $s3 = $conn->prepare("UPDATE pengundian SET noKP=? WHERE noKP=?");
-            $s3->bind_param("ss", $newNoKP, $oldNoKP);
-            $s3->execute();
-
-            $conn->query("SET FOREIGN_KEY_CHECKS=1");
-        } else {
-            // noKP tidak berubah — hanya kemas kini nama, kelas, dan katalaluan
-            $s1 = $conn->prepare("UPDATE pengundi SET nama=?, idKelas=? WHERE noKP=?");
-            $s1->bind_param("sss", $nama, $idKelas, $oldNoKP);
-            $s1->execute();
-
-            $s2 = $conn->prepare("UPDATE pengguna SET katalaluan=? WHERE noKP=?");
-            $s2->bind_param("ss", $katalaluan, $oldNoKP);
-            $s2->execute();
-        }
+        $s2 = $conn->prepare("UPDATE pengguna SET katalaluan=? WHERE noKP=?");
+        $s2->bind_param("ss", $katalaluan, $oldNoKP);
+        $s2->execute();
 
         $conn->commit();
         echo "<script>alert('Maklumat pengundi berjaya dikemas kini!'); window.location.href='admin.php';</script>";
@@ -58,8 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['sah_edit'])) {
 
     } catch (Exception $e) {
         $conn->rollback();
-        $conn->query("SET FOREIGN_KEY_CHECKS=1");
-        $message = "<div class='message error'>Ralat: Kad Pengenalan mungkin sudah wujud atau terdapat masalah sistem.</div>";
+        $message = "<div class='message error'>Ralat: Terdapat masalah sistem semasa mengemas kini data.</div>";
     }
 }
 
@@ -151,10 +126,12 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
                 <form action="kemaskini.php" method="POST">
                     <input type="hidden" name="sah_edit" value="1">
                     <input type="hidden" name="oldNoKP" value="<?php echo htmlspecialchars($voter['noKP']); ?>">
+                    <input type="hidden" name="noKP" value="<?php echo htmlspecialchars($voter['noKP']); ?>">
 
                     <div class="form-group">
                         <label>Nama Penuh :</label>
-                        <input type="text" name="nama" required value="<?php echo htmlspecialchars($voter['nama']); ?>">
+                        <input type="text" name="nama" id="nama" required value="<?php echo htmlspecialchars($voter['nama']); ?>"
+                            oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')">
                     </div>
 
                     <div class="form-group">
@@ -171,7 +148,9 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
 
                     <div class="form-group">
                         <label>No. Kad Pengenalan :</label>
-                        <input type="text" name="noKP" required value="<?php echo htmlspecialchars($voter['noKP']); ?>" placeholder="000000000000">
+                        <input type="text" value="<?php echo htmlspecialchars($voter['noKP']); ?>"
+                            disabled
+                            style="opacity: 0.5; cursor: not-allowed;">
                     </div>
 
                     <div class="form-group">
@@ -181,9 +160,20 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
 
                     <div class="btn-container" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
                         <button type="button" class="btn btn-secondary" onclick="window.location.href='admin.php'">Batal</button>
-                        <button type="submit" class="btn btn-primary">Sah</button>
+                        <button type="submit" class="btn btn-primary" onclick="return sahkanBorang()">Sah</button>
                     </div>
                 </form>
+
+                <script>
+                    function sahkanBorang() {
+                        const nama = document.getElementById('nama').value.trim();
+                        if (!/^[a-zA-Z ]+$/.test(nama)) {
+                            alert('Nama hanya boleh mengandungi huruf abjad dan ruang sahaja.');
+                            return false;
+                        }
+                        return true;
+                    }
+                </script>
             </div>
 
             <div class="footer">Hak Cipta Goh Tze Xiang @ SPM 2025</div>

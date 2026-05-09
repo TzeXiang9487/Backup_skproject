@@ -12,15 +12,6 @@ if (!isset($_SESSION['voter_noKP'])) {
     <meta charset="UTF-8">
     <title>Laman Utama - Sistem Undian</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .welcome-text {
-            color: #3b82f6;
-            margin-bottom: 20px;
-        }
-        body.light-mode .welcome-text {
-            color: #d4af37;
-        }
-    </style>
 </head>
 <body>
 <script>
