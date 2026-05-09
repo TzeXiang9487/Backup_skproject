@@ -2,6 +2,7 @@
 session_start();
 require_once 'config.php';
 
+// Semakan akses admin
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: index.php");
     exit();
@@ -9,39 +10,39 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 $message = "";
 
-// 1. Handle Edit Form Submission
+// 1. Mengendalikan Penghantaran Borang Kemas Kini
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['sah_edit'])) {
-    $oldNoKP   = $_POST['oldNoKP'];
-    $newNoKP   = trim($_POST['noKP']);
-    $nama      = trim($_POST['nama']);
-    $idKelas   = $_POST['idKelas'];
+    $oldNoKP    = $_POST['oldNoKP'];
+    $newNoKP    = trim($_POST['noKP']);
+    $nama       = trim($_POST['nama']);
+    $idKelas    = $_POST['idKelas'];
     $katalaluan = trim($_POST['katalaluan']);
 
     $conn->begin_transaction();
     try {
         if ($newNoKP !== $oldNoKP) {
-            // noKP changed — update all related tables carefully
-            // Temporarily disable foreign key checks
+            // noKP berubah — kemas kini semua jadual berkaitan dengan teliti
+            // Matikan semakan 'foreign key' buat sementara waktu
             $conn->query("SET FOREIGN_KEY_CHECKS=0");
 
-            // Update pengundi
+            // Kemas kini jadual pengundi
             $s1 = $conn->prepare("UPDATE pengundi SET noKP=?, nama=?, idKelas=? WHERE noKP=?");
             $s1->bind_param("ssss", $newNoKP, $nama, $idKelas, $oldNoKP);
             $s1->execute();
 
-            // Update pengguna
+            // Kemas kini jadual pengguna
             $s2 = $conn->prepare("UPDATE pengguna SET noKP=?, katalaluan=? WHERE noKP=?");
             $s2->bind_param("sss", $newNoKP, $katalaluan, $oldNoKP);
             $s2->execute();
 
-            // Update pengundian if exists
+            // Kemas kini jadual pengundian jika wujud
             $s3 = $conn->prepare("UPDATE pengundian SET noKP=? WHERE noKP=?");
             $s3->bind_param("ss", $newNoKP, $oldNoKP);
             $s3->execute();
 
             $conn->query("SET FOREIGN_KEY_CHECKS=1");
         } else {
-            // noKP unchanged — just update nama, kelas, katalaluan
+            // noKP tidak berubah — hanya kemas kini nama, kelas, dan katalaluan
             $s1 = $conn->prepare("UPDATE pengundi SET nama=?, idKelas=? WHERE noKP=?");
             $s1->bind_param("sss", $nama, $idKelas, $oldNoKP);
             $s1->execute();
@@ -58,11 +59,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['sah_edit'])) {
     } catch (Exception $e) {
         $conn->rollback();
         $conn->query("SET FOREIGN_KEY_CHECKS=1");
-        $message = "<div class='message error'>Ralat: Kad Pengenalan mungkin sudah wujud atau masalah sistem.</div>";
+        $message = "<div class='message error'>Ralat: Kad Pengenalan mungkin sudah wujud atau terdapat masalah sistem.</div>";
     }
 }
 
-// 2. Load voter data from URL noKP
+// 2. Muat data pengundi berdasarkan noKP dari URL
 if (isset($_GET['noKP'])) {
     $noKP_url = $_GET['noKP'];
 } elseif (isset($_POST['oldNoKP'])) {
@@ -88,24 +89,24 @@ if ($result->num_rows == 0) {
 }
 $voter = $result->fetch_assoc();
 
-// Load kelas list for dropdown
+// Muat senarai kelas untuk pilihan dropdown
 $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
 ?>
 <!DOCTYPE html>
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Kemas Kini Pengundi - Game Dev Vote</title>
+    <title>Kemas Kini Pengundi - Sistem Undian</title>
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
 </head>
 <body class="centered-page">
 <script>
-    // 1. Check and apply theme immediately to prevent white flashes
+    // 1. Semak dan laksanakan tema dengan segera untuk elakkan "white flash"
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
     }
 
-    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
+    // 2. Tetapkan ikon yang betul sebaik sahaja halaman dimuatkan
     window.addEventListener('DOMContentLoaded', () => {
         const themeBtn = document.getElementById('theme-btn');
         if (themeBtn) {
@@ -113,27 +114,24 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
         }
     });
 
-    // 3. The Toggle Function
+    // 3. Fungsi Tukar Tema
     function toggleTheme() {
         var body = document.body;
         var themeBtn = document.getElementById('theme-btn');
         
-        // Remove and re-add the 'spin' class to trigger the CSS animation
         themeBtn.classList.remove('spin');
-        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        void themeBtn.offsetWidth; // Paksa pelayar untuk mula semula animasi
         themeBtn.classList.add('spin');
 
-        // Switch the theme
         body.classList.toggle('light-mode');
         
-        // Halfway through the animation (200ms), swap the icon so it looks seamless
         setTimeout(() => {
             if (body.classList.contains('light-mode')) {
                 localStorage.setItem('theme', 'light');
-                themeBtn.innerText = '☀️'; // Change to Sun
+                themeBtn.innerText = '☀️'; 
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeBtn.innerText = '🌙'; // Change to Moon
+                themeBtn.innerText = '🌙';
             }
         }, 200); 
     }
@@ -141,9 +139,9 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
     <div class="page-wrapper">
         <div class="container">
             <div class="header">
-    <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
-    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
-</div>
+                <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
+                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+            </div>
 
             <div class="content">
                 <h3 class="page-title" style="text-align: center; margin-bottom: 25px;">Kemas Kini Data Pengundi</h3>
@@ -155,7 +153,7 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
                     <input type="hidden" name="oldNoKP" value="<?php echo htmlspecialchars($voter['noKP']); ?>">
 
                     <div class="form-group">
-                        <label>Nama :</label>
+                        <label>Nama Penuh :</label>
                         <input type="text" name="nama" required value="<?php echo htmlspecialchars($voter['nama']); ?>">
                     </div>
 
@@ -172,16 +170,16 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
                     </div>
 
                     <div class="form-group">
-                        <label>Kad Pengenalan :</label>
-                        <input type="text" name="noKP" required value="<?php echo htmlspecialchars($voter['noKP']); ?>" placeholder="000000-00-0000">
+                        <label>No. Kad Pengenalan :</label>
+                        <input type="text" name="noKP" required value="<?php echo htmlspecialchars($voter['noKP']); ?>" placeholder="000000000000">
                     </div>
 
                     <div class="form-group">
-                        <label>Kata laluan :</label>
+                        <label>Kata Laluan :</label>
                         <input type="text" name="katalaluan" required value="<?php echo htmlspecialchars($voter['katalaluan']); ?>">
                     </div>
 
-                    <div class="btn-container">
+                    <div class="btn-container" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
                         <button type="button" class="btn btn-secondary" onclick="window.location.href='admin.php'">Batal</button>
                         <button type="submit" class="btn btn-primary">Sah</button>
                     </div>

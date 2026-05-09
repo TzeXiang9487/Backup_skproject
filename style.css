@@ -66,7 +66,7 @@ body {
 
 /* -----------------------------------------
    2. SPECIAL CENTERED BOX LAYOUT 
-   (Only for login.php and register.php)
+   (Only for login.php and daftar.php)
 ----------------------------------------- */
 body.centered-page {
     justify-content: center; /* Centers vertically */
@@ -347,7 +347,7 @@ body.light-mode {
     color: #1e293b; 
 }
 
-/* Centered Layout Light Mode (Login/Register) */
+/* Centered Layout Light Mode (Login/daftar) */
 body.light-mode.centered-page .container {
     background-color: #ffffff;
     border: 1px solid #e2e8f0; 
@@ -476,7 +476,7 @@ body.light-mode .footer {
    BUG FIXES & LIGHT MODE OVERRIDES
    ========================================= */
 
-/* 1. Form Inputs (Login, Register, Admin, Kemaskini) */
+/* 1. Form Inputs (Login, daftar, Admin, Kemaskini) */
 .form-group input, .form-group select {
     width: 100%; 
     padding: 12px; 
@@ -552,8 +552,19 @@ body.light-mode .modal-content h3,
 body.light-mode .modal-content p { color: #1e293b; }
 
 /* 5. Import System */
-body.light-mode .drop-zone { background-color: #ffffff; border-color: #cbd5e1; color: #1e293b; }
-body.light-mode .drag-overlay { background-color: rgba(255, 255, 255, 0.95); color: #1e293b; }
+body.light-mode .drop-zone { 
+    background-color: #fffdf5; 
+    border-color: #d4af37; 
+    color: #1e293b; 
+}
+body.light-mode .drop-zone:hover,
+body.light-mode .drop-zone.dragover {
+    background-color: #fdf3cd;
+    border-color: #b8962e;
+}
+body.light-mode .drop-zone-title { color: #1e293b; }
+body.light-mode .drop-zone-sub   { color: #5c4800; }
+body.light-mode .drag-overlay    { background-color: rgba(253, 248, 238, 0.95); color: #7a5c00; }
 
 /* =========================================
    THEME TOGGLE BUTTON ANIMATION

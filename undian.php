@@ -2,18 +2,15 @@
 session_start();
 require_once 'config.php';
 
-// 2. SECURITY CHECK: Kick out if not logged in
 if (!isset($_SESSION['voter_noKP'])) {
     header("Location: index.php");
     exit();
 }
 
-// 3. Prevent browser from caching the page (Stops the "Back" button issue completely)
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// 4. Process voting into the database (Strict: One vote per lifetime)
 if (isset($_GET['vote_id']) && isset($_GET['voter_ic'])) {
     $idCalon = $_GET['vote_id'];
     $noKP = $_GET['voter_ic']; 
@@ -58,65 +55,25 @@ $result_calon = $conn->query($sql_calon);
     <style>
         /* ── Desktop only: no scroll ── */
         @media (min-width: 768px) {
-            html, body {
-                overflow: hidden;
-                height: 100%;
-            }
-
-            .page-wrapper {
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-
-            .container {
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-
+            html, body { overflow: hidden; height: 100%; }
+            .page-wrapper { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+            .container { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
             .content {
-                flex: 1;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                padding-top: 10px !important;
-                padding-bottom: 10px !important;
+                flex: 1; overflow: hidden; display: flex; flex-direction: column;
+                justify-content: center; padding-top: 10px !important; padding-bottom: 10px !important;
             }
-
-            .voting-container {
-                overflow: hidden;
-                gap: 15px;
-                padding: 10px;
-            }
-
-            /* Scale down cards to fit within screen */
-            .candidate-card {
-                height: 230px;
-            }
-
-            .candidate-card:hover {
-                width: 460px;
-            }
-
-            .card-left {
-                width: 200px;
-            }
-
-            .card-right {
-                width: 280px;
-            }
+            .voting-container { overflow: hidden; gap: 15px; padding: 10px; }
+            .candidate-card { height: 230px; }
+            .candidate-card:hover { width: 460px; }
+            .card-left { width: 200px; }
+            .card-right { width: 280px; }
         }
 
-        /* ── Base card styles (all screens) ── */
         .voting-container {
             display: flex;
-            flex-wrap: wrap; 
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 25px; 
+            gap: 25px;
             padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
@@ -126,10 +83,10 @@ $result_calon = $conn->query($sql_calon);
             display: flex;
             flex-direction: row;
             width: 260px;
-            height: 360px; 
+            height: 360px;
             background: #1e293b;
             border-radius: 16px;
-            overflow: hidden; 
+            overflow: hidden;
             border: 1px solid #334155;
             transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
         }
@@ -141,10 +98,14 @@ $result_calon = $conn->query($sql_calon);
             z-index: 10;
         }
 
+        body.light-mode .candidate-card:hover {
+            border-color: #d4af37;
+        }
+
         .card-left {
-            width: 260px; 
+            width: 260px;
             height: 100%;
-            flex-shrink: 0; 
+            flex-shrink: 0;
             position: relative;
         }
 
@@ -156,10 +117,10 @@ $result_calon = $conn->query($sql_calon);
         }
 
         .card-right {
-            width: 280px; 
+            width: 280px;
             height: 100%;
-            flex-shrink: 0; 
-            padding: 25px; 
+            flex-shrink: 0;
+            padding: 25px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -171,8 +132,18 @@ $result_calon = $conn->query($sql_calon);
 
         .candidate-card:hover .card-right {
             opacity: 1;
-            transform: translateX(0); 
-            transition-delay: 0.15s; 
+            transform: translateX(0);
+            transition-delay: 0.15s;
+        }
+
+        /* Heading */
+        .senarai-title {
+            color: #3b82f6;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        body.light-mode .senarai-title {
+            color: #fbbf24;
         }
 
         .game-title {
@@ -191,6 +162,10 @@ $result_calon = $conn->query($sql_calon);
             display: block;
         }
 
+        body.light-mode .candidate-count {
+            color: #d4af37;
+        }
+
         .game-desc {
             color: #94a3b8;
             font-size: 0.95rem;
@@ -198,6 +173,7 @@ $result_calon = $conn->query($sql_calon);
             margin-bottom: auto;
         }
 
+        /* Undi Sekarang button */
         .btn-vote {
             width: 100%;
             padding: 12px;
@@ -210,23 +186,31 @@ $result_calon = $conn->query($sql_calon);
             color: white;
             border: none;
             border-radius: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
         }
-        
+
         .btn-vote:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        body.light-mode .btn-vote {
+            background-color: #d4af37;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        body.light-mode .btn-vote:hover {
+            background-color: #b8962e;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
         }
     </style>
 </head>
 <body>
 <script>
-    // 1. Check and apply theme immediately to prevent white flashes
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
     }
 
-    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
     window.addEventListener('DOMContentLoaded', () => {
         const themeBtn = document.getElementById('theme-btn');
         if (themeBtn) {
@@ -234,27 +218,23 @@ $result_calon = $conn->query($sql_calon);
         }
     });
 
-    // 3. The Toggle Function
     function toggleTheme() {
         var body = document.body;
         var themeBtn = document.getElementById('theme-btn');
         
-        // Remove and re-add the 'spin' class to trigger the CSS animation
         themeBtn.classList.remove('spin');
-        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        void themeBtn.offsetWidth;
         themeBtn.classList.add('spin');
 
-        // Switch the theme
         body.classList.toggle('light-mode');
         
-        // Halfway through the animation (200ms), swap the icon so it looks seamless
         setTimeout(() => {
             if (body.classList.contains('light-mode')) {
                 localStorage.setItem('theme', 'light');
-                themeBtn.innerText = '☀️'; // Change to Sun
+                themeBtn.innerText = '☀️';
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeBtn.innerText = '🌙'; // Change to Moon
+                themeBtn.innerText = '🌙';
             }
         }, 200); 
     }
@@ -275,7 +255,7 @@ $result_calon = $conn->query($sql_calon);
             </div>
             
             <div class="content">
-                <h2 style="color: #fbbf24; text-align: center; margin-bottom: 5px;">Senarai Calon Pertandingan Permainan Video</h2>
+                <h2 class="senarai-title">Senarai Calon Pertandingan Permainan Video</h2>
                 <p style="text-align: center; color: #94a3b8; margin-bottom: 10px; font-size: 1rem;">
                     Sila hover (halakan kursor) pada gambar untuk melihat maklumat, kemudian undi permainan video pilihan anda!
                 </p>
@@ -284,8 +264,7 @@ $result_calon = $conn->query($sql_calon);
                     <?php
                     if ($result_calon->num_rows > 0) {
                         while($row = $result_calon->fetch_assoc()) {
-                            
-                            $lokasi_gambar = "image/placeholder.jpg"; 
+                            $lokasi_gambar = "image/placeholder.jpg";
                             $keterangan = "Sebuah ciptaan permainan video yang hebat.";
 
                             if ($row['namaCalon'] == 'Hollow Knight') {
@@ -342,14 +321,11 @@ $result_calon = $conn->query($sql_calon);
             }
         }
 
-function keluarAkaun() {
-    // Keep these so the frontend forgets the user too
-    localStorage.removeItem('voter_noKP');
-    localStorage.removeItem('voter_name');
-    
-    // CHANGE THIS LINE to point to your new file
-    window.location.href = 'logout.php'; 
-}
+        function keluarAkaun() {
+            localStorage.removeItem('voter_noKP');
+            localStorage.removeItem('voter_name');
+            window.location.href = 'logout.php'; 
+        }
     </script>
 </body>
 </html>

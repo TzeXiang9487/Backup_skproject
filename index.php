@@ -2,12 +2,12 @@
 require_once 'config.php'; 
 session_start();
 
-// ✅ LOGOUT: If ?logout=1 is in the URL, destroy the PHP session
+// Jika ?logout=1 ada dalam URL, musnahkan sesi PHP
 if (isset($_GET['logout']) && $_GET['logout'] == '1') {
     session_destroy();
 }
 
-// ✅ FEATURE: If already logged in, skip login page entirely
+// Jika sudah log masuk, langkau halaman log masuk terus ke dashboard yang berkaitan
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     header("Location: admin.php");
     exit();
@@ -19,11 +19,12 @@ if (isset($_SESSION['voter_noKP'])) {
 
 $message = "";
 
-// --- ADMIN LOGIN LOGIC ---
+// --- LOGIK LOG MASUK ADMIN ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['is_admin_login'])) {
     $admin_user = $_POST['admin_username'];
     $admin_pass = $_POST['admin_password'];
 
+    // Kelayakan admin (Hardcoded berdasarkan kod asal)
     if ($admin_user === "admin" && $admin_pass === "123") {
         $_SESSION['admin_logged_in'] = true;
         header("Location: admin.php");
@@ -33,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['is_admin_login'])) {
     }
 }
 
-// 1. Handle Login Verification
+// --- LOGIK LOG MASUK PENGUNDI ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
     $noKP = $_POST['noKP'];
     $katalaluan = $_POST['katalaluan'];
@@ -41,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
     $stmt = $conn->prepare("
         SELECT p.noKP, v.nama 
         FROM pengguna p 
-        JOIN PENGUNDI v ON p.noKP = v.noKP 
+        JOIN pengundi v ON p.noKP = v.noKP 
         WHERE p.noKP = ? AND p.katalaluan = ?
     ");
     $stmt->bind_param("ss", $noKP, $katalaluan);
@@ -53,11 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
         $storedNoKP = $user['noKP'];
         $userName = $user['nama'];
 
-        // Set PHP session
+        // Tetapkan sesi PHP
         $_SESSION['voter_noKP'] = $storedNoKP;
         $_SESSION['voter_name'] = $userName;
 
-        // Set localStorage and redirect
+        // Tetapkan localStorage dan hantar ke halaman utama
         echo "<script>
             localStorage.setItem('voter_noKP', '" . addslashes($storedNoKP) . "');
             localStorage.setItem('voter_name', '" . addslashes($userName) . "');
@@ -72,21 +73,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Game Dev Vote</title>
+    <title>Log Masuk - Sistem Undian</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Memastikan peralihan tema yang lancar */
+        .spin { animation: spin 0.4s ease-in-out; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body class="centered-page">
 <script>
-    // 1. Check and apply theme immediately to prevent white flashes
+    // 1. Semak dan laksanakan tema dengan segera untuk elakkan "white flash"
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
     }
 
-    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
+    // 2. Tetapkan ikon yang betul sebaik sahaja halaman dimuatkan
     window.addEventListener('DOMContentLoaded', () => {
         const themeBtn = document.getElementById('theme-btn');
         if (themeBtn) {
@@ -94,39 +100,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
         }
     });
 
-    // 3. The Toggle Function
+    // 3. Fungsi Tukar Tema
     function toggleTheme() {
         var body = document.body;
         var themeBtn = document.getElementById('theme-btn');
         
-        // Remove and re-add the 'spin' class to trigger the CSS animation
         themeBtn.classList.remove('spin');
-        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        void themeBtn.offsetWidth; // Paksa pelayar untuk mula semula animasi
         themeBtn.classList.add('spin');
 
-        // Switch the theme
         body.classList.toggle('light-mode');
         
-        // Halfway through the animation (200ms), swap the icon so it looks seamless
         setTimeout(() => {
             if (body.classList.contains('light-mode')) {
                 localStorage.setItem('theme', 'light');
-                themeBtn.innerText = '☀️'; // Change to Sun
+                themeBtn.innerText = '☀️';
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeBtn.innerText = '🌙'; // Change to Moon
+                themeBtn.innerText = '🌙';
             }
         }, 200); 
     }
 
-// 4. Prevent back (Using JavaScript event listeners instead of body tags)
-        window.history.forward();
-        function noBack() { window.history.forward(); }
-        setTimeout("noBack()", 0);
-        window.onunload = function () { null };
-
+    // 4. Halang butang 'Back' pelayar
+    window.history.forward();
+    function noBack() { window.history.forward(); }
+    setTimeout("noBack()", 0);
+    window.onunload = function () { null };
 </script>
-<body class="centered-page" onload="noBack();" onpageshow="if (event.persisted) noBack();">
+
     <div class="page-wrapper">
         <div class="container">
             <div class="header">
@@ -135,7 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
             </div>
             <div class="content">
                 <p style="text-align: center; color: #94a3b8; margin-bottom: 20px;">
-                    Welcome back! Please enter your credentials to log in.
+                    Selamat kembali! Sila masukkan maklumat anda untuk log masuk.
                 </p>
                 
                 <?php echo $message; ?>
@@ -143,19 +145,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
                 <form action="index.php" method="POST">
                     <div class="form-group">
                         <label>No. Kad Pengenalan :</label>
-                        <input type="text" name="noKP" required placeholder="000000-00-0000">
+                        <input type="text" name="noKP" required placeholder="Contoh: 000000000000">
                     </div>
                     <div class="form-group">
                         <label>Katalaluan :</label>
-                        <input type="password" name="katalaluan" required placeholder="Sila masukkan katalaluan">
+                        <input type="password" name="katalaluan" required placeholder="Masukkan katalaluan anda">
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Log Masuk</button>
                 </form>
 
                 <div class="links">
-                    <p>Admin? <a href="#" onclick="document.getElementById('adminModal').style.display='flex'">Sila klik di sini.</a></p>
-                    <p>Belum Daftar? <a href="register.php">Sila klik di sini.</a></p>
+                    <p>Admin? <a href="#" onclick="document.getElementById('adminModal').style.display='flex'">Klik di sini</a></p>
+                    <p>Belum Daftar? <a href="daftar.php">Klik di sini untuk mendaftar</a></p>
                 </div>
             </div>
             <div class="footer">
@@ -172,15 +174,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
                 
                 <div class="form-group">
                     <label>Nama Pengguna :</label>
-                    <input type="text" name="admin_username" required placeholder="Sila masukkan nama pengguna">
+                    <input type="text" name="admin_username" required placeholder="Masukkan nama pengguna admin">
                 </div>
                 
                 <div class="form-group">
                     <label>Katalaluan :</label>
-                    <input type="password" name="admin_password" required placeholder="Sila masukkan katalaluan">
+                    <input type="password" name="admin_password" required placeholder="Masukkan katalaluan admin">
                 </div>
 
-                <div class="btn-container">
+                <div class="btn-container" style="display: flex; gap: 10px; justify-content: center;">
                     <button type="button" class="btn btn-secondary" onclick="document.getElementById('adminModal').style.display='none'">Batal</button>
                     <button type="submit" class="btn btn-primary">Log Masuk</button>
                 </div>

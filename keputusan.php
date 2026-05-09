@@ -26,6 +26,15 @@ $result = $conn->query($sql);
     <title>Keputusan Undian - Game Dev Vote</title>
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
     <style>
+
+        .content-title {
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+        body.light-mode .content-title {
+            color: #d4af37;
+        }
+
         /* =========================================
            FULL SCREEN & NO SCROLL LAYOUT
            ========================================= */
@@ -106,44 +115,38 @@ $result = $conn->query($sql);
 </head>
 <body>
     <script>
-        // 1. Check and apply theme immediately to prevent white flashes
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-        }
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
 
-        // 2. Set the correct icon (Sun or Moon) as soon as the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            const themeBtn = document.getElementById('theme-btn');
-            if (themeBtn) {
-                themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+    window.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+        }
+    });
+
+    function toggleTheme() {
+        var body = document.body;
+        var themeBtn = document.getElementById('theme-btn');
+        
+        themeBtn.classList.remove('spin');
+        void themeBtn.offsetWidth;
+        themeBtn.classList.add('spin');
+
+        body.classList.toggle('light-mode');
+        
+        setTimeout(() => {
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+                themeBtn.innerText = '☀️';
+            } else {
+                localStorage.setItem('theme', 'dark');
+                themeBtn.innerText = '🌙';
             }
-        });
-
-        // 3. The Toggle Function
-        function toggleTheme() {
-            var body = document.body;
-            var themeBtn = document.getElementById('theme-btn');
-            
-            // Remove and re-add the 'spin' class to trigger the CSS animation
-            themeBtn.classList.remove('spin');
-            void themeBtn.offsetWidth; // This forces the browser to restart the animation
-            themeBtn.classList.add('spin');
-
-            // Switch the theme
-            body.classList.toggle('light-mode');
-            
-            // Halfway through the animation (200ms), swap the icon so it looks seamless
-            setTimeout(() => {
-                if (body.classList.contains('light-mode')) {
-                    localStorage.setItem('theme', 'light');
-                    themeBtn.innerText = '☀️'; // Change to Sun
-                } else {
-                    localStorage.setItem('theme', 'dark');
-                    themeBtn.innerText = '🌙'; // Change to Moon
-                }
-            }, 200); 
-        }
-    </script>
+        }, 200); 
+    }
+</script>
     <div class="page-wrapper">
         <div class="container">
             
@@ -153,7 +156,7 @@ $result = $conn->query($sql);
                     <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
                 </div>
                 <div class="nav-bar">
-                    <a href="admin.php" class="nav-item">Dashboard Admin</a>
+                    <a href="admin.php" class="nav-item">Papan Pemuka</a>
                     <a href="import.php" class="nav-item">Import</a>
                     <a href="keputusan.php" class="nav-item active">Keputusan</a>
                     <a href="logout.php" class="nav-item">Keluar</a>
@@ -173,7 +176,7 @@ $result = $conn->query($sql);
 
             <div class="content">
 
-                <h2 style="color: #3b82f6; text-align: center; margin-bottom: 20px;">
+                <h2 class="content-title">
                     Berikut ialah keputusan Undi !
                 </h2>
 
@@ -183,9 +186,9 @@ $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
                         $tempat_nama = array(1 => "Pertama", 2 => "Kedua", 3 => "Ketiga", 4 => "Keempat", 5 => "Kelima");
 
-                        $kedudukan = 1;       // Actual position counter (always increments)
-                        $rank_display = 1;    // Rank shown to user (only updates when votes differ)
-                        $prev_undi = null;    // Previous row's vote count
+                        $kedudukan = 1;       // Kaunter kedudukan sebenar (sentiasa bertambah)
+                        $rank_display = 1;    // Kedudukan ditunjukkan kepada pengguna (hanya dikemas kini apabila undian berbeza)
+                        $prev_undi = null;    // Kiraan undi baris sebelumnya
 
                         while ($row = $result->fetch_assoc()) {
                             $lokasi_gambar = "image/placeholder.jpg"; 
@@ -197,7 +200,7 @@ $result = $conn->query($sql);
                                 $lokasi_gambar = "image/C03.png";
                             }
 
-                            // If vote count differs from previous, update displayed rank to actual position
+                            // Jika kiraan undi berbeza daripada sebelumnya, kemas kini kedudukan yang dipaparkan kepada kedudukan sebenar
                             if ($prev_undi !== null && $row['jumlah_undian'] < $prev_undi) {
                                 $rank_display = $kedudukan;
                             }
@@ -206,17 +209,14 @@ $result = $conn->query($sql);
 
                             echo "<div class='ranking-card'>";
 
-                            // New Responsive Image Box
                             echo "  <div class='ranking-image-container'>";
                             echo "      <img src='{$lokasi_gambar}' alt='" . htmlspecialchars($row['namaCalon']) . "'>";
                             echo "  </div>";
 
-                            // Ranking label
                             echo "  <div class='ranking-label'>";
                             echo        $label_kedudukan;
                             echo "  </div>";
 
-                            // Name and vote count
                             echo "  <div class='ranking-name'>";
                             echo        htmlspecialchars($row['namaCalon']) . "<br>";
                             echo "      <span class='ranking-votes'>(" . $row['jumlah_undian'] . " Undi)</span>";
@@ -241,13 +241,12 @@ $result = $conn->query($sql);
     </div>
 
     <script>
-function keluarAkaun() {
-    // Keep these so the frontend forgets the user too
+    function keluarAkaun() {
     localStorage.removeItem('voter_noKP');
     localStorage.removeItem('voter_name');
     
-    // CHANGE THIS LINE to point to your new file
     window.location.href = 'logout.php'; 
-}
+    }
+    </script>
 </body>
 </html>

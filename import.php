@@ -2,6 +2,7 @@
 session_start();
 require_once 'config.php';
 
+// Semakan akses admin
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: index.php");
     exit();
@@ -9,7 +10,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 $result_json = null;
 
-// ── Handle AJAX POST import ──
+// ── Mengendalikan import melalui AJAX POST ──
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
     header('Content-Type: application/json');
 
@@ -37,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
         exit();
     }
 
+    // Mengesan jenis data berdasarkan sel pertama
     $firstCell = isset($records[0][0]) ? trim($records[0][0]) : '';
 
     if (preg_match('/^C/i', $firstCell)) {
@@ -49,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
     }
 
     foreach ($records as $index => $row) {
-        $rowNum = $index + 2;
+        $rowNum = $index + 2; // Untuk rujukan baris dalam mesej ralat
 
         if ($type === 'calon') {
             $idCalon   = isset($row[0]) ? trim($row[0]) : '';
@@ -60,6 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                 $skipped++; continue;
             }
 
+            // Semak jika data sudah wujud
             $chk = $conn->prepare("SELECT idCalon FROM calon WHERE idCalon = ?");
             $chk->bind_param("s", $idCalon);
             $chk->execute();
@@ -107,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Import Data - Game Dev Vote</title>
+    <title>Import Data - Sistem Undian</title>
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -166,20 +169,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             margin-bottom: 10px;
         }
 
-        .format-guide {
-            max-width: 600px;
-            margin: 0 auto 15px auto;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 16px 20px;
-        }
-        .format-guide h4 { color: #3b82f6; margin-bottom: 10px; font-size: 0.95rem; }
-        .format-guide table { width: 100%; font-size: 0.85rem; }
-        .format-guide th { color: #94a3b8; padding: 4px 8px; text-align: left; }
-        .format-guide td { color: #f8fafc; padding: 4px 8px; }
-        .format-guide tr:hover { background: transparent; }
-
         #drag-overlay {
             display: none;
             position: fixed;
@@ -193,25 +182,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             pointer-events: none;
         }
         #drag-overlay.active { display: flex; }
-        #drag-overlay-text {
-            color: #3b82f6;
-            font-size: 2rem;
-            font-weight: bold;
-            background: #0f172a;
-            padding: 30px 50px;
-            border-radius: 16px;
-            border: 2px solid #3b82f6;
-        }
+#drag-overlay-text {
+    color: #3b82f6;
+    font-size: 2rem;
+    font-weight: bold;
+    background: #0f172a;
+    padding: 30px 50px;
+    border-radius: 16px;
+    border: 2px solid #3b82f6;
+}
+
+/* Light mode fixes for drop zone text */
+body.light-mode .drop-zone-title { color: #1e293b; }
+body.light-mode .drop-zone-sub   { color: #5c4800; }
+
+/* Light mode drag overlay */
+body.light-mode #drag-overlay {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: #d4af37;
+}
+body.light-mode #drag-overlay-text {
+    color: #b8962e;
+    background: #fffdf5;
+    border-color: #d4af37;
+}
     </style>
 </head>
 <body>
     <script>
-    // 1. Check and apply theme immediately to prevent white flashes
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
     }
 
-    // 2. Set the correct icon (Sun or Moon) as soon as the page loads
     window.addEventListener('DOMContentLoaded', () => {
         const themeBtn = document.getElementById('theme-btn');
         if (themeBtn) {
@@ -219,40 +221,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
         }
     });
 
-    // 3. The Toggle Function
     function toggleTheme() {
         var body = document.body;
         var themeBtn = document.getElementById('theme-btn');
-        
-        // Remove and re-add the 'spin' class to trigger the CSS animation
         themeBtn.classList.remove('spin');
-        void themeBtn.offsetWidth; // This forces the browser to restart the animation
+        void themeBtn.offsetWidth; 
         themeBtn.classList.add('spin');
-
-        // Switch the theme
         body.classList.toggle('light-mode');
         
-        // Halfway through the animation (200ms), swap the icon so it looks seamless
         setTimeout(() => {
             if (body.classList.contains('light-mode')) {
                 localStorage.setItem('theme', 'light');
-                themeBtn.innerText = '☀️'; // Change to Sun
+                themeBtn.innerText = '☀️';
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeBtn.innerText = '🌙'; // Change to Moon
+                themeBtn.innerText = '🌙';
             }
         }, 200); 
     }
-</script>
+    </script>
+
     <div class="page-wrapper">
         <div class="container">
             <div class="header">
-    <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
-    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
-</div>
+                <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
+                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+            </div>
 
             <div class="nav-bar">
-                <a href="admin.php" class="nav-item">Dashboard Admin</a>
+                <a href="admin.php" class="nav-item">Papan Pemuka</a>
                 <a href="import.php" class="nav-item active">Import</a>
                 <a href="keputusan.php" class="nav-item">Keputusan</a>
                 <a href="logout.php" class="nav-item">Keluar</a>
@@ -264,12 +261,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                     Sistem akan mengesan jadual sasaran secara automatik berdasarkan format lajur pertama fail anda.
                 </p>
 
-
-
-                <!-- Result message -->
                 <div class="import-result" id="import-result"></div>
 
-                <!-- Preview -->
                 <div class="preview-wrap" id="preview-wrap">
                     <h4>Pratonton Data</h4>
                     <div id="detected-badge" class="detected-badge"></div>
@@ -278,11 +271,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                     </div>
                 </div>
 
-                <!-- Drop Zone -->
                 <div class="drop-zone" id="drop-zone" onclick="document.getElementById('fileInput').click()">
                     <div class="drop-zone-icon">📂</div>
                     <div class="drop-zone-title">Klik untuk pilih fail atau seret & lepas di sini</div>
-                    <div class="drop-zone-sub">Sokongan: .xlsx, .xls, .csv</div>
+                    <div class="drop-zone-sub">Format disokong: .xlsx, .xls, .csv</div>
                     <button type="button" class="btn btn-primary" style="pointer-events: none;">Pilih Fail Excel / CSV</button>
                 </div>
                 <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleFile(this.files[0])">
@@ -297,15 +289,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
     </div>
 
     <script>
-        function keluarAkaun() {
-            localStorage.removeItem('voter_noKP');
-            localStorage.removeItem('voter_name');
-            window.location.href = 'index.php?logout=1';
-        }
-
-        const tableNames = {
-            calon: 'Jadual: calon',
-            kelas: 'Jadual: kelas'
+        const namaJadual = {
+            calon: 'Jadual: Calon',
+            kelas: 'Jadual: Kelas'
         };
 
         function handleFile(file) {
@@ -329,7 +315,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                     }));
 
                 if (records.length === 0) {
-                    showResult('Fail kosong atau tiada data dijumpai.', false);
+                    tunjukkanHasil('Fail kosong atau tiada data dijumpai.', false);
                     return;
                 }
 
@@ -338,7 +324,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                 if (/^C/i.test(first))      detectedType = 'calon';
                 else if (/^K/i.test(first)) detectedType = 'kelas';
 
-                showPreview(records, detectedType);
+                tunjukkanPratonton(records, detectedType);
 
                 fetch('import.php', {
                     method: 'POST',
@@ -350,35 +336,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                 })
                 .then(res => {
                     if (!res.ok) {
-                        return res.text().then(t => { throw new Error('Server error: ' + t); });
+                        return res.text().then(t => { throw new Error('Ralat Pelayan: ' + t); });
                     }
-                    return res.text().then(t => {
-                        try { return JSON.parse(t); }
-                        catch(e) { throw new Error('Respons tidak sah: ' + t); }
-                    });
+                    return res.json();
                 })
                 .then(result => {
                     if (result.success) {
-                        let msg = `✅ Diimport ke <strong>${tableNames[result.type] || result.type}</strong> — Berjaya: <strong>${result.inserted}</strong>, Dilangkau: <strong>${result.skipped}</strong>.`;
+                        let msg = `✅ Berjaya diimport ke <strong>${namaJadual[result.type] || result.type}</strong> — Rekod Baharu: <strong>${result.inserted}</strong>, Dilangkau (Wujud): <strong>${result.skipped}</strong>.`;
                         if (result.errors && result.errors.length > 0) {
                             msg += '<br><small style="color:#fca5a5;">' + result.errors.join('<br>') + '</small>';
                         }
-                        showResult(msg, true);
+                        tunjukkanHasil(msg, true);
                     } else {
-                        showResult('❌ ' + result.message, false);
+                        tunjukkanHasil('❌ ' + result.message, false);
                     }
                 })
-                .catch(err => showResult('❌ ' + err.message, false));
+                .catch(err => tunjukkanHasil('❌ ' + err.message, false));
             };
             reader.readAsArrayBuffer(file);
             document.getElementById('fileInput').value = '';
         }
 
-        function showPreview(records, type) {
+        function tunjukkanPratonton(records, type) {
             const wrap  = document.getElementById('preview-wrap');
             const badge = document.getElementById('detected-badge');
             const table = document.getElementById('preview-table');
-            badge.textContent         = type ? ('🔍 Dikesan: ' + (tableNames[type] || type)) : '⚠️ Format tidak dikenali';
+            badge.textContent          = type ? ('🔍 Jenis Dikesan: ' + (namaJadual[type] || type)) : '⚠️ Format tidak dikenali';
             badge.style.backgroundColor = type ? '#1d4ed8' : '#7f1d1d';
             const thead = `<thead><tr>${records[0].map((_,i) => `<th>Lajur ${i+1}</th>`).join('')}</tr></thead>`;
             const tbody = `<tbody>${records.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
@@ -386,7 +369,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             wrap.style.display = 'block';
         }
 
-        function showResult(msg, success) {
+        function tunjukkanHasil(msg, success) {
             const el = document.getElementById('import-result');
             el.style.display      = 'block';
             el.style.backgroundColor = success ? '#064e3b' : '#7f1d1d';
@@ -394,7 +377,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             el.innerHTML          = msg;
         }
 
-        // Drop zone
+        // Kawalan Drag and Drop
         const dropZone = document.getElementById('drop-zone');
         dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -404,7 +387,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             handleFile(e.dataTransfer.files[0]);
         });
 
-        // Page-wide drag overlay
         const overlay = document.getElementById('drag-overlay');
         document.addEventListener('dragenter', e => { e.preventDefault(); overlay.classList.add('active'); });
         document.addEventListener('dragover',  e => e.preventDefault());
