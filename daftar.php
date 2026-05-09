@@ -19,16 +19,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // 1. Masukkan data ke dalam jadual PENGUNDI
             $stmt1 = $conn->prepare("INSERT INTO PENGUNDI (noKP, nama, idKelas) VALUES (?, ?, ?)");
             $stmt1->bind_param("sss", $noKP, $nama, $idKelas);
-            $stmt1->execute();
+            if (!$stmt1->execute()) { throw new Exception($stmt1->error); }
 
             // 2. Masukkan data ke dalam jadual pengguna (untuk log masuk)
             $stmt2 = $conn->prepare("INSERT INTO pengguna (noKP, katalaluan) VALUES (?, ?)");
             $stmt2->bind_param("ss", $noKP, $katalaluan);
-            $stmt2->execute();
+            if (!$stmt2->execute()) { throw new Exception($stmt2->error); }
 
             // Laksanakan 'commit' jika kedua-dua kemasukan berjaya
             $conn->commit();
-            $message = "<div class='message success'>Pendaftaran Berjaya! Sila log masuk.</div>";
+            echo "<script>alert('Pendaftaran Berjaya! Sila log masuk.'); window.location.href='index.php';</script>";
             
             // Halakan pengguna ke halaman log masuk selepas 2 saat
             header("refresh:2;url=index.php");
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } catch (Exception $e) {
             // Batalkan transaksi jika terdapat ralat (contoh: noKP pendua)
             $conn->rollback();
-            $message = "<div class='message error'>Ralat: No. KP sudah wujud atau terdapat masalah sistem.</div>";
+            echo "<script>alert('Ralat: No. KP sudah wujud atau terdapat masalah sistem.'); window.location.href='daftar.php';</script>";
         }
     }
 }

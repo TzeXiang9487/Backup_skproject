@@ -91,7 +91,9 @@ $result = $conn->query($sql);
             <div class="content">
 
                 <h2 class="content-title">
+                    <center>
                     Berikut ialah keputusan Undi !
+                    </center>
                 </h2>
 
                 <div class="ranking-container">
@@ -127,13 +129,12 @@ $result = $conn->query($sql);
                             echo "      <img src='{$lokasi_gambar}' alt='" . htmlspecialchars($row['namaCalon']) . "'>";
                             echo "  </div>";
 
-                            echo "  <div class='ranking-label'>";
-                            echo        $label_kedudukan;
-                            echo "  </div>";
-
-                            echo "  <div class='ranking-name'>";
-                            echo        htmlspecialchars($row['namaCalon']) . "<br>";
-                            echo "      <span class='ranking-votes'>(" . $row['jumlah_undian'] . " Undi)</span>";
+                            echo "  <div class='ranking-info'>";
+                            echo "      <div class='ranking-label'>" . $label_kedudukan . "</div>";
+                            echo "  <div class='ranking-name-row'>";
+echo "      <span class='ranking-name'>" . htmlspecialchars($row['namaCalon']) . "</span>";
+echo "      <span class='ranking-votes'>(" . $row['jumlah_undian'] . " Undi)</span>";
+echo "  </div>";
                             echo "  </div>";
 
                             echo "</div>";

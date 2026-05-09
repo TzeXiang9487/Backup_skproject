@@ -145,15 +145,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['is_admin_login'])) {
                 <form action="index.php" method="POST">
                     <div class="form-group">
                         <label>No. Kad Pengenalan :</label>
-                        <input type="text" name="noKP" required placeholder="Contoh: 000000-00-0000">
+                        <input type="text" name="noKP" id="noKP" required placeholder="Contoh: 000000-00-0000"
+                            maxlength="14"
+                            oninput="formatNoKP(this)">
                     </div>
                     <div class="form-group">
                         <label>Katalaluan :</label>
                         <input type="password" name="katalaluan" required placeholder="Masukkan katalaluan anda">
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Log Masuk</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" onclick="return sahkanBorang()">Log Masuk</button>
                 </form>
+
+                <script>
+                    function formatNoKP(input) {
+                        let val = input.value.replace(/\D/g, '');
+                        if (val.length > 6)  val = val.slice(0,6) + '-' + val.slice(6);
+                        if (val.length > 9)  val = val.slice(0,9) + '-' + val.slice(9);
+                        if (val.length > 14) val = val.slice(0,14);
+                        input.value = val;
+                    }
+
+                    function sahkanBorang() {
+                        const noKP = document.getElementById('noKP').value.trim();
+                        if (!/^\d{6}-\d{2}-\d{4}$/.test(noKP)) {
+                            alert('Format No. KP tidak sah. Sila gunakan format: 000000-00-0000');
+                            return false;
+                        }
+                        return true;
+                    }
+                </script>
 
                 <div class="links">
                     <p>Admin? <a href="#" onclick="document.getElementById('adminModal').style.display='flex'">Klik di sini</a></p>

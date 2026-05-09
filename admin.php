@@ -8,7 +8,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 
-// LEFT JOIN so all voters appear, voted or not
+// LEFT JOIN supaya semua pengundi hadir, mengundi atau tidak
 $sql = "SELECT
             pg.noKP,
             pg.nama,
@@ -91,7 +91,7 @@ $result = $conn->query($sql);
                     <button onclick="window.print()" class="btn btn-primary btn-cetak" style="background-color: #f59e0b;">Cetak</button>
                 </div>
 
-                <div style="overflow-x: auto;">
+                <div style="overflow-x: auto;" class="table-scroll-wrapper">
                     <table style="min-width: 100%; width: max-content;">
                         <thead>
                             <tr>
@@ -120,19 +120,21 @@ $result = $conn->query($sql);
                                     echo "<td>" . htmlspecialchars($row['katalaluan']) . "</td>";
                                     echo "<td>" . htmlspecialchars($row['kelas']) . "</td>";
                                     echo "<td>" . htmlspecialchars($row['noKP']) . "</td>";
-
-                                    // Calon & vote info — show placeholder if not voted
                                     echo "<td>" . ($sudahUndi ? htmlspecialchars($row['namaCalon']) : "<em style='color:#64748b;'>Belum Mengundi</em>") . "</td>";
                                     echo "<td>" . ($sudahUndi ? htmlspecialchars($row['idCalon'])   : "<em style='color:#64748b;'>-</em>") . "</td>";
                                     echo "<td>" . ($sudahUndi ? date("d-m-Y", strtotime($row['tarikh'])) : "<em style='color:#64748b;'>-</em>") . "</td>";
 
-                                    // Action buttons — disable cancel if not voted
+                                    // Butang tindakan — lumpuhkan batal jika tidak diundi
                                     echo "<td class='aksi-column'>";
-                                    echo "<a href='kemaskini.php?noKP=" . urlencode($row['noKP']) . "' class='btn btn-primary' style='background-color:#3b82f6; padding:6px 12px; font-size:0.85rem; text-decoration:none; margin-right:5px;'>Kemaskini</a>";
+                                    echo "<a href='kemaskini.php?noKP=" . urlencode($row['noKP']) . "' class='btn btn-primary' style='background-color:#3b82f6; 
+                                    padding:6px 12px; font-size:0.85rem; text-decoration:none; margin-right:5px;'>Kemaskini</a>";
                                     if ($sudahUndi) {
-                                        echo "<button onclick=\"bukaPengesahan('" . addslashes($row['noKP']) . "', '" . addslashes($row['nama']) . "', '" . addslashes($row['tarikh']) . "')\" class='btn' style='background-color:#ef4444; color:white; padding:6px 12px; font-size:0.85rem;'>Batal</button>";
+                                        echo "<button onclick=\"bukaPengesahan('" . addslashes($row['noKP']) . "', '" . addslashes($row['nama']) . "',
+                                        '" . addslashes($row['tarikh']) . "')\" class='btn' style='background-color:#ef4444;
+                                         color:white; padding:6px 12px; font-size:0.85rem;'>Batal</button>";
                                     } else {
-                                        echo "<button disabled class='btn' style='background-color:#334155; color:#64748b; padding:6px 12px; font-size:0.85rem; cursor:not-allowed;'>Batal</button>";
+                                        echo "<button disabled class='btn' style='background-color:#334155; color:#64748b; padding:6px 12px; font-size:0.85rem;
+                                        cursor:not-allowed;'>Batal</button>";
                                     }
                                     echo "</td>";
                                     echo "</tr>";

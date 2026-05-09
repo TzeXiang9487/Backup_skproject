@@ -115,7 +115,7 @@ $kelas_result = $conn->query("SELECT idKelas, kelas FROM kelas");
         <div class="container">
             <div class="header">
                 <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
-                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()"  >🌙</button>
             </div>
 
             <div class="content">

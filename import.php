@@ -116,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
         <div class="container">
             <div class="header">
                 <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
-                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+                <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()"  >🌙</button>
             </div>
 
             <div class="nav-bar">
@@ -129,10 +129,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             <div class="content">
                 <h2 style="color: #ef4444; margin-bottom: 5px;">Import Data Kelas</h2>
                 <p style="color: #94a3b8; margin-bottom: 15px;">
-                    Muat naik fail Excel atau CSV yang mengandungi data kelas. Lajur pertama mestilah <strong>idKelas</strong> (contoh: K01) dan lajur kedua <strong>nama kelas</strong>.
+                    Muat naik fail Excel atau CSV yang mengandungi data kelas. Lajur pertama mestilah <strong>idKelas</strong> (contoh: K01) dan 
+                    lajur kedua <strong>nama kelas</strong>.
                 </p>
 
-                <!-- Result message -->
                 <div class="import-result" id="import-result"></div>
 
                 <!-- Drop Zone -->
@@ -144,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                 </div>
                 <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleFile(this.files[0])">
 
-                <!-- Preview Section (replaces drop zone on file load) -->
+                <!-- Preview Section -->
                 <div class="preview-section" id="preview-section">
                     <div class="preview-table-wrap">
                         <table id="preview-table" style="width: 100%;"></table>
@@ -166,13 +166,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
     </div>
 
     <script>
-        let pendingRecords = null; // Holds parsed CSV data waiting for confirmation
+        let pendingRecords = null; // Menyimpan data CSV yang telah dihuraikan menunggu pengesahan
 
-        // ── Parse file and show preview ──
+        // ── Uraikan fail dan tunjukkan pratonton ──
         function handleFile(file) {
             if (!file) return;
 
-            // Reset any previous result message
+            // Tetapkan semula sebarang mesej hasil sebelumnya
             sembunyikanHasil();
 
             const reader = new FileReader();
@@ -194,18 +194,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                     }));
 
                 if (records.length === 0) {
-                    tunjukkanHasil('Fail kosong atau tiada data dijumpai.', false);
+                    alert('❌ Fail kosong atau tiada data dijumpai.');
                     return;
                 }
 
-                // Validate it's kelas data
+                // Sahkan data kelasnya
                 const first = records[0][0];
                 if (!/^K/i.test(first)) {
-                    tunjukkanHasil('❌ Format tidak dikenali. Lajur pertama mestilah idKelas (contoh: K01).', false);
+                    alert('❌ Format tidak dikenali. Lajur pertama mestilah idKelas (contoh: K01).');
                     return;
                 }
 
-                // Store records and show preview
+                // Simpan rekod dan tunjukkan pratonton
                 pendingRecords = records;
                 tunjukkanPratonton(records);
             };
@@ -213,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             document.getElementById('fileInput').value = '';
         }
 
-        // ── Show preview table, hide drop zone ──
+        // ── Tunjukkan jadual pratonton, sembunyikan zon jatuh ──
         function tunjukkanPratonton(records) {
             const dropZone      = document.getElementById('drop-zone');
             const previewSection = document.getElementById('preview-section');
@@ -225,12 +225,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             ).join('')}</tbody>`;
             table.innerHTML = thead + tbody;
 
-            // Swap visibility
             dropZone.style.display      = 'none';
             previewSection.style.display = 'block';
         }
 
-        // ── "Batal" — go back to drop zone ──
+        // Batal
         function batalImport() {
             pendingRecords = null;
             document.getElementById('drop-zone').style.display      = 'block';
@@ -239,7 +238,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             sembunyikanHasil();
         }
 
-        // ── "Sah" — send data to server ──
+        // Sah
         function sahImport() {
             if (!pendingRecords) return;
 
@@ -262,22 +261,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
                 return res.json();
             })
             .then(result => {
-                // Hide preview, show drop zone again
+                // Sembunyikan pratonton, tunjukkan zon jatuh sekali lagi
                 batalImport();
 
-                if (result.success) {
-                    let msg = `Berjaya diimport ke <strong>Jadual: Kelas</strong> — Rekod Baharu: <strong>${result.inserted}</strong>, Dilangkau (Wujud): <strong>${result.skipped}</strong>.`;
-                    if (result.errors && result.errors.length > 0) {
-                        msg += '<br><small style="color:#fca5a5;">' + result.errors.join('<br>') + '</small>';
-                    }
-                    tunjukkanHasil(msg, true);
+            if (result.success) {
+                let msg = `Berjaya diimport!\nRekod Baharu: ${result.inserted}, Dilangkau (Wujud): ${result.skipped}`;
+                if (result.errors && result.errors.length > 0) {
+                    msg += '\n' + result.errors.join('\n');
+            }
+            
+            alert(msg);
                 } else {
-                    tunjukkanHasil('❌ ' + result.message, false);
+                    alert('❌ ' + result.message);
                 }
             })
             .catch(err => {
                 batalImport();
-                tunjukkanHasil('❌ ' + err.message, false);
+                alert('❌ ' + err.message);
             })
             .finally(() => {
                 sahBtn.disabled    = false;
@@ -285,7 +285,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             });
         }
 
-        // ── Result message helpers ──
         function tunjukkanHasil(msg, success) {
             const el = document.getElementById('import-result');
             el.style.display         = 'block';
@@ -300,7 +299,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SERVER['HTTP_X_REQUESTED_WIT
             el.innerHTML     = '';
         }
 
-        // ── Drag and Drop ──
+        // ── Seret dan Lepas ──
         const dropZone = document.getElementById('drop-zone');
         dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));

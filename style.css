@@ -533,16 +533,17 @@ tr.belum-undi td {
 .ranking-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
     gap: 20px;
     flex-wrap: nowrap;
     width: 100%;
     max-width: 1200px;
+    margin: 0 auto;
 }
 
 .ranking-card {
     flex: 1 1 0;
-    max-width: 250px;
+    max-width: 280px;
     min-width: 150px;
     background-color: #1e293b;
     border: 1px solid #334155;
@@ -555,11 +556,12 @@ tr.belum-undi td {
     transition: all 0.3s ease;
 }
 
+/* Image: horizontal ratio instead of square */
 .ranking-image-container {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 16 / 21;
     height: auto;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -572,17 +574,17 @@ tr.belum-undi td {
 
 .ranking-label {
     width: 100%;
-    padding: 8px 0;
+    padding: 6px 0;
     background-color: #3b82f6;
     color: white;
     border-radius: 25px;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     text-align: center;
+    margin-bottom: 8px;
 }
 
 .ranking-name {
-    margin-top: 15px;
     text-align: center;
     color: #f8fafc;
     font-weight: bold;
@@ -810,6 +812,8 @@ body.light-mode #drag-overlay-text     { color: #b8962e; background: #fffdf5; bo
 
 /* Ranking cards */
 body.light-mode .ranking-card          { background-color: #ffffff; border-color: #e2e8f0; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+body.light-mode .ranking-card:hover    { border-color: #d4af37; }
+body.light-mode .ranking-image-container img { border-right: 1px solid #e2e8f0; }
 body.light-mode .ranking-label         { background-color: #d4af37; }
 body.light-mode .ranking-name          { color: #1e293b; }
 body.light-mode .ranking-votes         { color: #64748b; }
