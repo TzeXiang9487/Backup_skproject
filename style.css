@@ -336,6 +336,16 @@ tr.belum-undi td {
     opacity: 0.6;
 }
 
+/* Sembunyikan scrollbar untuk kontena jadual admin */
+.table-scroll-wrapper {
+    scrollbar-width: none;            /* Untuk Firefox */
+    -ms-overflow-style: none;         /* Untuk Internet Explorer/Edge */
+}
+
+.table-scroll-wrapper::-webkit-scrollbar {
+    display: none;                    /* Untuk Chrome, Safari, dan Opera */
+}
+
 
 /* -----------------------------------------
    10. STATUS MESSAGES
