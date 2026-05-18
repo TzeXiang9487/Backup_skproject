@@ -90,11 +90,12 @@ $result = $conn->query($sql);
 
             <div class="content">
 
-                <h2 class="content-title">
-                    <center>
-                    Berikut ialah keputusan Undi !
-                    </center>
-                </h2>
+                <div class="print-title-keputusan">Laporan Keputusan Undian Semasa</div>
+
+                <div class="keputusan-title-row">
+                    <h2 class="content-title">Berikut ialah keputusan Undi !</h2>
+                    <button onclick="window.print()" class="btn btn-primary btn-cetak-keputusan">Cetak</button>
+                </div>
 
                 <div class="ranking-container">
                     
