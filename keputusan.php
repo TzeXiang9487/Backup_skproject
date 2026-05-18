@@ -67,7 +67,7 @@ $result = $conn->query($sql);
             <?php if ($is_admin): ?>
                 <div class="header">
                     <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
-                    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+                    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
                 </div>
                 <div class="nav-bar">
                     <a href="admin.php" class="nav-item">Papan Pemuka</a>
@@ -78,7 +78,7 @@ $result = $conn->query($sql);
             <?php else: ?>
                 <div class="header">
                     <span>Sistem D'Undi Pertandingan Penciptaan Permainan Video</span>
-                    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Tukar Mod Tema">🌙</button>
+                    <button id="theme-btn" class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
                 </div>
                 <div class="nav-bar">
                     <a href="utama.php" class="nav-item">Laman Utama</a>
