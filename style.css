@@ -608,7 +608,26 @@ tr.belum-undi td {
 
 .content-title {
     color: #3b82f6;
+    margin-bottom: 0;
+}
+
+.keputusan-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
     margin-bottom: 20px;
+}
+
+.btn-cetak-keputusan {
+    position: absolute;
+    right: 0;
+    padding: 8px 18px;
+    font-size: 0.9rem;
+}
+
+.print-title-keputusan {
+    display: none;
 }
 
 
@@ -641,10 +660,11 @@ tr.belum-undi td {
 ----------------------------------------- */
 .print-title { display: none; }
 
-@page { margin: 0; }
+@page { margin: 5mm 10mm 10mm 10mm; }
 
 @media print {
     .header, .nav-bar, .btn-cetak,
+    .btn-cetak-keputusan,
     .footer, .aksi-column, h2 { display: none !important; }
 
     tr.belum-undi      { display: none !important; }
@@ -659,8 +679,91 @@ tr.belum-undi td {
         margin: 30px 0 20px 0;
     }
 
-    body, .container { background: white !important; color: black !important; }
-    .content         { padding: 0 20px !important; }
+    /* Keputusan print styles */
+    .print-title-keputusan {
+        display: block !important;
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: black !important;
+        margin: 20px 0 25px 0;
+        border-bottom: 2px solid black;
+        padding-bottom: 10px;
+    }
+
+    .keputusan-title-row { display: none !important; }
+
+    .ranking-container {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+        width: 100% !important;
+    }
+
+    .ranking-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        background: white !important;
+        border: 1px solid #999 !important;
+        box-shadow: none !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        height: auto !important;
+        flex: 1 1 0 !important;
+        max-width: 200px !important;
+        padding: 10px !important;
+    }
+
+    .ranking-image-container {
+        width: 100% !important;
+        aspect-ratio: 16 / 21 !important;
+        height: auto !important;
+        flex-shrink: 0 !important;
+        border-radius: 6px !important;
+        overflow: hidden !important;
+        margin-bottom: 10px !important;
+    }
+
+    .ranking-image-container img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-right: none !important;
+    }
+
+    .ranking-info {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .ranking-label {
+        background-color: #333 !important;
+        color: white !important;
+        display: block !important;
+        width: 100% !important;
+        padding: 5px 0 !important;
+        font-size: 0.9rem !important;
+        border-radius: 20px !important;
+        margin-bottom: 8px !important;
+        text-align: center !important;
+    }
+
+    .ranking-name { color: black !important; font-size: 0.95rem !important; text-align: center !important; }
+    .ranking-votes { color: #444 !important; font-size: 0.85rem !important; text-align: center !important; }
+    .ranking-name-row { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2px !important; }
+
+    body, .container, .content { background: white !important; color: black !important; }
+    .content { padding: 0 20px !important; overflow: visible !important; }
+    .print-title-keputusan { margin: 5px 0 15px 0 !important; }
     table            { border: 1px solid black; width: 100% !important; }
     th, td           { border-bottom: 1px solid black; color: black !important; background: white !important; font-size: 0.85rem; }
     th               { color: black !important; }
