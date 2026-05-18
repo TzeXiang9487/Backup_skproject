@@ -123,9 +123,7 @@ $result_kelas = $conn->query($sql_kelas);
 
                     <div class="form-group">
                         <label>No. Kad Pengenalan :</label>
-                        <input type="text" name="noKP" id="noKP" placeholder="Contoh: 000000-00-0000" required
-                            maxlength="14"
-                            oninput="formatNoKP(this)">
+                        <input type="text" name="noKP" id="noKP" placeholder="Contoh: 000000-00-0000" required oninput="this.value = this.value.replace(/[^0-9-]/g, '')">
                     </div>
 
                     <div class="form-group">
@@ -140,14 +138,6 @@ $result_kelas = $conn->query($sql_kelas);
                 </form>
 
                 <script>
-                    function formatNoKP(input) {
-                        let val = input.value.replace(/\D/g, '');
-                        if (val.length > 6)  val = val.slice(0,6) + '-' + val.slice(6);
-                        if (val.length > 9)  val = val.slice(0,9) + '-' + val.slice(9);
-                        if (val.length > 14) val = val.slice(0,14);
-                        input.value = val;
-                    }
-
                     function sahkanBorang() {
                         const nama = document.getElementById('nama').value.trim();
                         const noKP = document.getElementById('noKP').value.trim();

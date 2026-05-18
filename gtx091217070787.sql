@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 10, 2026 at 03:58 PM
+-- Generation Time: May 18, 2026 at 01:01 PM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 5.6.31
 
@@ -113,7 +113,7 @@ CREATE TABLE `pengundi` (
 --
 
 INSERT INTO `pengundi` (`noKP`, `nama`, `idKelas`) VALUES
-('090214-07-1234', 'Lee Wei Jie', 'K01'),
+('090214-07-1234', ' Lee Wei Jie', 'K01'),
 ('090505-07-4455', 'Chong Yi Hong', 'K02'),
 ('090629-07-8899', 'Goh Jia Wei', 'K01'),
 ('090715-07-3344', 'Lim Jia Hui', 'K01'),
@@ -143,7 +143,7 @@ CREATE TABLE `pengundian` (
 --
 
 INSERT INTO `pengundian` (`noKP`, `tarikh`, `idCalon`) VALUES
-('090214-07-1234', '2025-08-18', 'C01'),
+('090214-07-1234', '2026-05-17', 'C01'),
 ('090505-07-4455', '2025-08-19', 'C03'),
 ('090629-07-8899', '2025-08-20', 'C01'),
 ('090715-07-3344', '2025-08-19', 'C02'),
@@ -193,12 +193,6 @@ ALTER TABLE `pengundian`
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `pengguna`
---
-ALTER TABLE `pengguna`
-  ADD CONSTRAINT `pengguna_ibfk_1` FOREIGN KEY (`noKP`) REFERENCES `pengundi` (`noKP`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `pengundi`
